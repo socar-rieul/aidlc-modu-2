@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: **CONSTRUCTION - Build and Test 완료, Approval Gate 대기**. 5종 instructions 작성 + 실제 검증 결과 통합. 다음: Operations(PLACEHOLDER).
+- **Current Stage**: ✅ **AI-DLC 워크플로우 완료** — INCEPTION 7 stage + CONSTRUCTION per-unit × 3 + Build and Test 모두 [x]. Operations 단계는 PLACEHOLDER (배포 없음 — 사용자 사전 결정, NFR-8 Local-only). 산출물 보존 상태: `packages/` 4 패키지 + `aidlc-docs/` 전체. 9/9 자동 테스트 PASS, vite build 220KB + 227KB, backend e2e 4/4.
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -71,4 +71,16 @@
 - [x] Build and Test (5종 instructions 작성 + 실제 검증 통합 — Backend e2e 4/4 + Customer Web vitest 1/1 + Admin Web vitest 4/4 = 9/9 PASS, vite production build 220KB + 227KB)
 
 ### 🟡 OPERATIONS PHASE
-- [ ] Operations (PLACEHOLDER — 배포 없음으로 생략 예정. Approval Gate 직전)
+- [x] Operations — **PLACEHOLDER** (배포 없음 — 사용자 사전 결정). 안내: [`operations/operations.md`](operations/operations.md)
+
+---
+
+## ✅ 워크플로우 완료
+
+전체 산출물:
+- INCEPTION: workspace + requirements v2 + 26 stories + workflow plan + application design 5종 + units 3종 (~14 문서)
+- CONSTRUCTION: per-unit × 3(design 24 + code 100+ 파일) + Build and Test 5 instructions
+- Operations: PLACEHOLDER
+- audit.md: 모든 사용자 입력 + AI 응답 기록
+
+검증: e2e 4/4 + vitest 5/5 = **9/9 자동 PASS** + vite production build 모두 성공.
