@@ -1,81 +1,98 @@
-# 테이블오더 서비스 — Requirements Document
+# 테이블오더 서비스 — Requirements Document (v2)
 
-본 문서는 AI-DLC Inception · Requirements Analysis 산출물이다.
-원본 요구사항은 [requirements/table-order-requirements.md](../../../requirements/table-order-requirements.md)·[requirements/constraints.md](../../../requirements/constraints.md)에 있으며, 본 문서는 9문항 clarifying questions 답변을 통합해 **확정 사양**을 정리한다.
+> **Version**: v2 (BYOD + QR 모델) — v1(공용 태블릿) 산출물은 git tag `v1-shared-tablet`에 보존. 전환 사유·rollback은 [aidlc-docs/audit.md ROLLBACK MARKER](../../audit.md) 참조.
+
+본 문서는 AI-DLC Inception · Requirements Analysis **Iteration 2** 산출물이다.
+원본 요구사항은 [requirements/table-order-requirements.md](../../../requirements/table-order-requirements.md) (구버전 디바이스 가정)이며, v2에서는 사용자 결정으로 디바이스/세션/광고 모델을 전환했다.
 
 ---
 
-## 1. Intent Analysis
+## 1. Intent Analysis (v2)
 
 | 항목 | 값 |
 |------|----|
-| User Request (원문) | "테이블오더 서비스를 구축하고 싶습니다. … AI-DLC 워크플로우를 시작해봅시다." |
-| Request Type | **New Project** (greenfield) |
-| Scope Estimate | **System-wide** (고객·관리자 양쪽 클라이언트 + 백엔드 + DB) |
-| Complexity Estimate | **Moderate ~ Complex** (실시간 SSE·세션 라이프사이클·다중 매장 데이터 모델 포함) |
-| Requirements Depth | **Standard** (워크샵 PoC — 핵심 기능·NFR 정의, traceability 매트릭스는 생략) |
+| User Request (원문) | "QR 로 각자 메뉴를 확인하고 각자 모바일 디바이스에서 메뉴를 확인할 수도 있고 각자 주문을 넣을 수도 있는 형태로 변경하고 싶은데..." + "광고 기능 넣고, 모두의주차장 서비스의 광고를 넣고 싶어." |
+| Request Type | **Enhancement (핵심 가정 변경)** — 디바이스 모델·인증·장바구니·가시성·신규 광고 기능 |
+| Scope Estimate | **System-wide** (클라이언트·인증·세션·데이터 모델 다수 영향) |
+| Complexity Estimate | **Moderate ~ Complex** (BYOD 다인 합류 + 공동 장바구니 동시성 + 광고 신규 영역) |
+| Requirements Depth | **Standard** (워크샵 PoC) |
 
-### 1.1 Stakeholders & Personas (요약)
-- **고객 (Customer)**: 매장 테이블에 비치된 태블릿에서 메뉴 조회·장바구니·주문·내역을 사용. 로그인 액션 없음(자동 로그인).
-- **매장 운영자 (Store Admin)**: 매장 인증 후 실시간 주문 모니터링·주문 직권 수정·테이블 세션 관리·메뉴 관리 수행.
+### 1.1 Stakeholders & Personas (v2 갱신)
 
-상세 User Stories·Persona는 다음 스테이지(User Stories)에서 도출한다.
+- **고객 (Customer)**: 매장 테이블 QR을 **본인 모바일 폰**(iOS Safari / Android Chrome)으로 스캔해 메뉴·장바구니·주문을 사용. 디바이스 = BYOD.
+  - 디지털 친화도 분포: 30대 친화도 중~상(P1 진우), 50대 친화도 하(P4 정희) — 둘 다 본인 폰 사용.
+- **매장 운영자 (Store Admin)**: 매장 인증 후 실시간 주문 모니터링·테이블 관리·메뉴 관리. 점주(P2) / 알바(P3) MVP 한정 동일 자격.
+- **광고주 (모두의주차장)**: **외부 stakeholder** — 광고 자산(배너 이미지·링크)을 시스템에 미리 등록·제공하지만 본 MVP의 사용자 페르소나는 아님 (시스템 UI 사용 없음). 풀 광고 시스템(등록·통계·정산)은 Out of Scope.
+
+User Stories·Persona 상세는 다음 스테이지에서 재도출.
 
 ---
 
-## 2. 확정 기술 스택 & 운영 제약 (9문항 답변 기반)
+## 2. 확정 기술 스택 & 운영 제약
 
-| 영역 | 결정 | 근거 (Q번호) |
-|------|------|--------------|
-| 매장 범위 | **다중 매장** — 매장 식별자로 분리 | Q1 |
-| 백엔드 | **Node.js + NestJS (TypeScript)** | Q2 |
-| 프론트엔드 | **React (TypeScript)** — 고객용·관리자용 공통 | Q3 |
-| 데이터 저장소 | **SQLite (파일 기반)** | Q4 |
-| 자동 로그인 저장 | **브라우저 localStorage** | Q5 |
-| 실행 환경 | **로컬 단일 머신** — 클라우드 배포 없음 | Q6 |
-| Security Baseline | **Off** | Q7 |
-| Property-Based Testing | **Off** | Q8 |
-| Resiliency Baseline | **Off** | Q9 |
-| 빌드/패키지 | npm workspaces (mono-repo 권장 — Construction에서 확정) | 유추 |
-| Java 사용 | **금지** (사용자 제약) | constraints (prompt) |
+### 2.1 v1에서 유지된 결정 (변경 없음)
+
+| 영역 | 결정 | 근거 |
+|------|------|------|
+| 매장 범위 | 다중 매장 | v1 Q1 |
+| 백엔드 | Node.js + NestJS (TypeScript) | v1 Q2 |
+| 프론트엔드 | React (TypeScript) | v1 Q3 |
+| 데이터 저장소 | SQLite | v1 Q4 |
+| 실행 환경 | 로컬 단일 머신 | v1 Q6 |
+| Security Baseline | Off | v1 Q7 |
+| Property-Based Testing | Off | v1 Q8 |
+| Resiliency Baseline | Off | v1 Q9 |
+| 관리자 세션 | JWT 30일 | v1 후속 변경 |
+| Java 사용 | 금지 | 사용자 제약 |
+
+### 2.2 v2 신규 결정 (이번 iteration)
+
+| 영역 | 결정 | 근거 |
+|------|------|------|
+| **클라이언트 형태** | **모바일 웹 (PWA)** — 설치 불필요, iOS Safari / Android Chrome 우선 지원 | v2 Q4 |
+| **고객 인증** | **QR 스캔** — 테이블별 영구 QR이 매장ID·테이블ID 토큰을 담음 | v2 Q3 |
+| **QR 라이프사이클** | **테이블당 영구 고정** — 한 번 인쇄·부착, 운영자가 필요 시 수동 재발급(무효화) | v2 Q3 |
+| **장바구니 모델** | **공동 장바구니** — 테이블 세션 단위로 1개. 참가자 누구나 추가·수정 가능 | v2 Q1 |
+| **주문 가시성** | **테이블 전체** — 모든 참가자가 같은 세션의 모든 주문을 시간 역순으로 함께 본다 (계산서 느낌) | v2 Q2 |
+| **광고 슬롯** | **단방향 광고** — 모두의주차장 배너 1~2개를 메뉴·장바구니 화면에 노출. 매장 on/off·교체 기능 없음(시스템 전체 동일 광고), 광고주 페르소나 추가 X | v2 Q5 |
+| **자동 로그인 (v1 FR-C1)** | **폐기** — localStorage 자격 저장 모델은 BYOD에서 의미 없음. 본인 폰 첫 진입은 QR 스캔, 세션 유지는 본인 폰 단위 임시 토큰 | v2 Q3·Q4 종합 |
 
 ---
 
 ## 3. Functional Requirements (FR)
 
-번호는 원본 문서의 섹션 번호를 따른다. 모든 항목 **MVP 포함 (Must-have)**.
+번호는 v1을 기준으로 유지하되 변경된 항목은 본문에 명시. 모든 항목 **MVP 포함 (Must-have)**.
 
-### 3.1 고객용 (Customer)
+### 3.1 고객용 (Customer) — BYOD 모바일 웹
 
-| FR ID | 요약 | 핵심 동작 |
-|-------|------|-----------|
-| **FR-C1** | 테이블 태블릿 자동 로그인·세션 관리 | 1) 관리자가 1회 매장ID·테이블번호·테이블비번 입력 후 localStorage 저장 2) 이후 접속 시 저장값으로 자동 로그인. |
-| **FR-C2** | 메뉴 조회·탐색 | 카테고리별 분류, 메뉴명/가격/설명/이미지 표시, 카테고리 빠른 이동, 메뉴 화면이 기본 화면. |
-| **FR-C3** | 장바구니 관리 | 추가·삭제·수량 증감, 총액 실시간, 비우기, 새로고침 시에도 유지(클라이언트 영속). 서버 전송은 주문 확정 시점에만. |
-| **FR-C4** | 주문 생성 | 최종 확인 → 확정 → 주문번호 표시(5초) → 장바구니 비우기 → 메뉴 화면 리다이렉트. 실패 시 에러 + 장바구니 유지. 주문 페이로드: 매장ID·테이블ID·메뉴목록(메뉴명·수량·단가)·총액·세션ID. |
-| **FR-C5** | 주문 내역 조회 | **현재 세션 주문만** 시간 역순 표시(번호·시각·메뉴·금액·상태[대기중/준비중/완료]). 매장 이용 완료 처리된 세션은 제외. |
+| FR ID | 요약 | 핵심 동작 (v2) |
+|-------|------|----------------|
+| **FR-C1** | **QR 스캔 입장** | 본인 폰 카메라/QR 앱으로 테이블 QR을 스캔 → 매장ID·테이블ID 토큰 검증 → 본인 폰에 세션 토큰 발급(localStorage 임시 저장) → 메뉴 화면 자동 진입. 같은 테이블에 N명 합류 가능. |
+| **FR-C2** | 메뉴 조회·탐색 | v1과 동일 — 카테고리·메뉴명·가격·설명·이미지. 모바일 폼팩터에 맞춘 반응형. |
+| **FR-C3** | **공동 장바구니** | 테이블 세션 단위로 **1개의 공동 장바구니**. 참가자 누구나 메뉴 추가·수량 조정·삭제 가능. 변경 사항은 **실시간(SSE)으로 다른 참가자 디바이스에 반영**. 본인 폰 새로고침 시에도 서버에서 최신 공동 장바구니 불러옴. |
+| **FR-C4** | 주문 생성 | 참가자 누구나 "주문 확정" 가능. 확정 시 공동 장바구니 → 주문 1건. 주문번호 표시 + 장바구니 자동 비움 + 메뉴 화면 리다이렉트. 다른 참가자 화면도 SSE로 동기화(장바구니 비움 + 주문 내역 갱신). |
+| **FR-C5** | **테이블 전체 주문 내역** | "주문 내역" 화면은 **현재 세션의 모든 참가자 주문을 합산해서** 시간 역순 표시. "누가" 시켰는지는 표기하지 않음(MVP 단순화). 종료된 과거 세션은 미노출. |
+| **FR-C6** (신규) | **광고 슬롯** | 모두의주차장 배너 1~2개를 메뉴 화면 상단/하단, 장바구니 화면 하단에 노출. 단방향(읽기 전용), 클릭 시 외부 링크. 매장별 on/off·교체 기능 없음. |
 
-### 3.2 관리자용 (Store Admin)
+### 3.2 관리자용 (Store Admin) — v1과 거의 동일, FR-A3 큰 변경
 
-| FR ID | 요약 | 핵심 동작 |
-|-------|------|-----------|
-| **FR-A1** | 매장 인증 | 매장ID·사용자명·비밀번호 입력 → JWT 발급 → **1개월(30일) 세션**, 새로고침 유지, 만료 시 자동 로그아웃. 비밀번호 bcrypt 저장. 로그인 시도 제한. (원본 요구사항의 16시간 → 사용자 요청으로 30일로 변경) |
-| **FR-A2** | 실시간 주문 모니터링 | **SSE 기반** 그리드 대시보드. 테이블별 카드(총액·최신 n개 미리보기). 카드 클릭 → 전체 메뉴 상세. 주문 상태 변경(대기중/준비중/완료). 신규 주문 시각 강조(색/애니메이션). 테이블별 필터링. |
-| **FR-A3** | 테이블 관리 | 4개 하위 기능: (1) 테이블 태블릿 초기 설정 — 테이블번호·비번 등록 + 16시간 세션 + 자동 로그인 활성화. (2) 주문 삭제(직권 수정) — 확인 팝업 → 즉시 삭제 → 총액 재계산. (3) **테이블 세션 라이프사이클** — 첫 주문 시 세션 시작, 매장 이용 완료 처리 시 세션 종료 + 현재 주문/총액 0 리셋 + 주문을 OrderHistory로 이동. (4) 과거 내역 조회 — 테이블별 시간 역순 + 날짜 필터. |
-| **FR-A4** | 메뉴 관리 | 카테고리별 조회, 등록(메뉴명·가격·설명·카테고리·이미지URL), 수정, 삭제, 노출 순서 조정. 필수 필드 검증, 가격 범위 검증. |
+| FR ID | 요약 | 핵심 동작 (v2) |
+|-------|------|----------------|
+| **FR-A1** | 매장 인증 | v1과 동일 (JWT 30일). |
+| **FR-A2** | 실시간 주문 모니터링 | v1과 동일 + 테이블 카드에 **현재 참가자 수(합류한 디바이스 수)** 부가 표시. |
+| **FR-A3** | **테이블 관리** (v2 갱신) | 하위 4개 — (1) **QR 발급·인쇄** (테이블 신규 등록 시 QR 생성, PDF/이미지 출력 + 무효화·재발급 기능), (2) 주문 직권 삭제(v1과 동일), (3) 테이블 세션 종료 + 모든 참가자 세션 토큰 일괄 무효화 + OrderHistory 이동, (4) 과거 내역 조회(v1과 동일). |
+| **FR-A4** | 메뉴 관리 | v1과 동일. |
 
-### 3.3 데이터 모델 (도출 — 상세는 Functional Design에서 확정)
+### 3.3 데이터 모델 변경 (v1 → v2)
 
-핵심 엔티티(추정):
-- `Store` (매장ID, 이름, …)
-- `AdminUser` (매장ID, username, password_hash[bcrypt], …)
-- `Table` (매장ID, 테이블번호, 테이블비번_hash, 현재세션ID, …)
-- `TableSession` (세션ID, 매장ID, 테이블ID, 시작시각, 종료시각nullable)
-- `Category` (매장ID, 이름, 정렬순서)
-- `Menu` (매장ID, 카테고리ID, 이름, 가격, 설명, 이미지URL, 정렬순서, 활성여부)
-- `Order` (주문번호, 매장ID, 테이블ID, 세션ID, 생성시각, 상태[대기중/준비중/완료], 총액)
-- `OrderItem` (주문번호, 메뉴명_스냅샷, 단가_스냅샷, 수량)
-- `OrderHistory` (세션 종료 후 옮겨지는 과거 주문 — 동일 스키마 또는 `Order.archived` 플래그 — 설계 단계에서 결정)
+추가·변경 엔티티:
+
+- **`Table`**: `qr_token` (UUID·테이블별 고유·영구) 컬럼 추가. `password_hash`(v1 테이블비번)는 폐기.
+- **`TableSession`**: 그대로 유지 — 세션 단위는 여전히 첫 주문 시작 ~ 매장 이용 완료.
+- **`SessionParticipant`** (**신규**): `id`, `session_id`, `device_token`, `joined_at`. 한 세션에 N개. 세션 종료 시 일괄 무효화.
+- **`Cart`** (**신규**): `session_id` (1:1), `items` JSON 또는 별도 `CartItem` 테이블. 공동 장바구니 동시성 처리(서버가 단일 권한).
+- **`Order`**: v1 그대로 — 단, 향후 누가 확정했는지 추적이 필요할 때 `confirmed_by_participant_id` 추가 옵션. **MVP는 미포함**.
+- **`Advertisement`** (**신규**): `id`, `slot`(menu_top / menu_bottom / cart_bottom), `image_url`, `click_url`, `active`. 시스템 전체 공통 — 매장·테이블별 분기 없음. 시드 데이터로 모두의주차장 1~2개 등록.
 
 ---
 
@@ -83,57 +100,66 @@
 
 | NFR ID | 카테고리 | 요구사항 | 비고 |
 |--------|----------|----------|------|
-| **NFR-1** | Performance | 신규 주문 발생 후 관리자 대시보드 반영 **≤ 2초** | SSE |
-| **NFR-2** | Session | 관리자 세션 **1개월(30일)**, 브라우저 새로고침 유지, 만료 시 자동 로그아웃 | JWT (사용자 요청으로 16시간 → 30일 변경) |
-| **NFR-3** | Security (최소선) | 관리자 비밀번호 **bcrypt** 해싱, 테이블 비밀번호 해싱, **로그인 시도 제한** | Security extension off지만 원본 요구사항에 명시된 항목은 유지 |
-| **NFR-4** | Usability | 터치 버튼 **≥ 44×44px**, 카드형 메뉴 레이아웃, 명확한 시각적 계층 | 고객 태블릿 UX |
-| **NFR-5** | Persistence (Client) | 장바구니·자동로그인 정보는 새로고침에도 유지 (localStorage) | FR-C1·FR-C3 |
-| **NFR-6** | Realtime Transport | 실시간 통신은 **Server-Sent Events (SSE)** | FR-A2 명시 |
-| **NFR-7** | Data Isolation | 모든 조회·집계는 매장ID 스코프 강제 | 다중 매장 (Q1) |
-| **NFR-8** | Local-only | 클라우드/외부 인프라 의존 없음 — `npm` 한 줄로 로컬 기동 가능해야 함 | Q6 |
+| **NFR-1** | Performance | 신규 주문/장바구니 변경 → 같은 세션 참가자 디바이스 반영 **≤ 2초** | SSE |
+| **NFR-2** | Session (관리자) | 관리자 세션 **30일**, 새로고침 유지, 만료 시 자동 로그아웃 | JWT |
+| **NFR-3** | Security (최소선) | 관리자 비밀번호 bcrypt 해싱, 로그인 시도 제한, QR 토큰은 충분히 long·예측 불가(UUIDv4 이상) | Security extension off 유지 |
+| **NFR-4** | Usability (모바일) | 본인 폰 시스템 폰트 크기 설정 따라가기(`rem` 단위), 터치 ≥ 44×44px (큰 글자 모드 시 ≥60×60px), 카드형 메뉴 레이아웃, 명확한 시각 계층 | P4 보조 — 본인 폰 접근성 설정 활용 |
+| **NFR-5** | Persistence | 세션 토큰만 본인 폰 localStorage에 저장(임시·세션 종료 시 무효). 공동 장바구니는 **서버 권한**으로 SSE 동기화 | v1 클라이언트 영속과 다름 — 주의 |
+| **NFR-6** | Realtime Transport | SSE — 공동 장바구니 변경·주문 생성·상태 변경 모두 SSE 채널 통해 N참가자에 푸시 | FR-C3·C4·C5·A2 |
+| **NFR-7** | Data Isolation | 모든 조회·집계는 매장ID 스코프, 추가로 테이블ID·세션ID 스코프 강제. 타 매장·타 테이블·타 세션 데이터 미노출 | 다중 매장 + N참가자 |
+| **NFR-8** | Local-only | 클라우드/외부 인프라 의존 없음. `npm` 한 줄로 로컬 기동. 광고 자산은 시드 데이터로 정적 제공(외부 광고 서버 호출 X) | Q6 + Q5 단방향 |
 | **NFR-9** | Tech Constraint | Java 사용 금지 | 사용자 제약 |
-| **NFR-10** | Testability | 단위 테스트 가능한 구조 (NestJS DI 활용) — PBT 미적용 | Q8 |
+| **NFR-10** | Testability | NestJS DI + SSE 채널 mock 가능 구조. PBT 미적용 | Q8 |
+| **NFR-11** (신규) | **반응형 / BYOD 호환** | iOS Safari 최신 / Android Chrome 최신 우선 지원. 화면 폭 320px~480px 우선 최적화. PWA manifest 제공(홈 화면 추가 가능). | v2 Q4 |
+| **NFR-12** (신규) | **공동 장바구니 동시성** | 두 명이 동시에 같은 메뉴 수량을 변경할 때 last-write-wins로 단순화. 서버가 변경 이벤트 시퀀스에 버전 부여, 클라이언트는 SSE로 최신 상태 수신 후 화면 갱신. | FR-C3 |
 
 ---
 
-## 5. Out of Scope (`constraints.md` 인용)
+## 5. Out of Scope (변경 — `constraints.md` 갱신 동반)
 
 다음은 **구현하지 않음**:
 
 - **결제**: 실결제·PG·영수증·환불·포인트/쿠폰
 - **인증·보안 고도화**: OAuth/SNS 로그인, 2FA/OTP
-- **컨텐츠**: 이미지 리사이징·CMS·광고
-- **알림**: 푸시·SMS·이메일·소리/진동
+- **컨텐츠**: 이미지 리사이징·CMS
+- **알림**: 푸시 알림(Web Push 포함)·SMS·이메일·소리/진동 — SSE 가시 알림으로 대체
 - **주방**: 주방 전달·재고
-- **고급 기능**: 분석 대시보드·매출 리포트·재고·직원 권한·예약·리뷰·다국어
+- **고급 기능**: 데이터 분석·매출 리포트·재고·직원 권한·예약·리뷰·다국어
 - **외부 연동**: 배달 플랫폼·POS·SNS 공유·지도·번역 API
+- **풀 광고 시스템**: 광고주 등록·노출 통계·정산·매장별 광고 on/off (Q5 A 옵션)
+- **참가자 개별 식별/표기**: 누가 어떤 메뉴를 시켰는지 추적·표시 (MVP는 테이블 전체 합산만)
+- **네이티브 앱**: iOS/Android 네이티브 앱 (모바일 웹/PWA만)
+
+> **변경 사항**: 기존 `constraints.md`의 "광고 기능 등은 포함하지 않음" 항목은 **단방향 광고는 허용**으로 부분 해제. constraints.md 본문도 함께 갱신.
 
 ---
 
-## 6. Extension Configuration
+## 6. Extension Configuration (v1 그대로 유지)
 
-| Extension | Enabled | 근거 |
-|-----------|---------|------|
-| Security Baseline | **No** | Q7 — 워크샵 PoC, 운영 보안 룰 패스 |
-| Property-Based Testing | **No** | Q8 — 단순 CRUD/UI 위주 |
-| Resiliency Baseline | **No** | Q9 — 로컬 PoC, 신뢰성 룰 패스 |
-
-→ Construction 단계에서 이 3개 extension 룰은 **비활성** (강제 검증 없음).
+| Extension | Enabled |
+|-----------|---------|
+| Security Baseline | No |
+| Property-Based Testing | No |
+| Resiliency Baseline | No |
 
 ---
 
-## 7. 핵심 비즈니스 룰 요약
+## 7. 핵심 비즈니스 룰 요약 (v2)
 
-- **테이블 세션** = 첫 주문 시작 ~ 매장 이용 완료 처리. 종료 시 현재 주문·총액 0 리셋 + 주문은 OrderHistory로 이동.
-- **현재 세션 주문**만 고객 화면에 노출 (이전 세션 invisible).
-- **모든 데이터는 매장ID 스코프** — 매장 간 데이터 절대 노출 금지.
-- **주문 페이로드 스냅샷**: 주문 생성 시 메뉴명·단가를 스냅샷 보존 (이후 메뉴 가격 변경에도 과거 주문 금액 안전).
-- **장바구니**는 서버 미저장, 주문 확정 시점에만 서버 전송.
+- **QR = 영구 토큰**: 테이블별 QR은 한 번 발급되면 영구 유지. 외부 노출 시 관리자가 수동 무효화·재발급.
+- **테이블 세션**: 첫 QR 스캔 직후가 아니라 **첫 주문 생성 시점**에 세션 시작 (v1 룰 유지). 단, 참가자 합류·이탈은 세션과 무관하게 자유.
+- **세션 종료**: 매장 이용 완료 처리 시 — (1) 활성 세션 종료, (2) 모든 참가자 세션 토큰 일괄 무효화(다음 손님이 같은 QR 스캔해도 새 세션), (3) 주문은 OrderHistory로 이동, (4) 공동 장바구니 비움.
+- **공동 장바구니 동시성**: 서버 권한. SSE로 N참가자에 변경 푸시. last-write-wins, 충돌 시 최신 서버 상태가 정답.
+- **주문 가시성**: 테이블 전체 합산 (FR-C5). 참가자 식별·표기 없음. 종료된 세션은 고객 측에서 보이지 않음(v1 CR-3과 동일 원칙).
+- **주문 스냅샷**: 주문 확정 시 메뉴명·단가 스냅샷 보존 (v1 CR-4 그대로).
+- **광고 단방향**: `Advertisement` 테이블 시드 데이터로 모두의주차장 1~2개 등록. 시스템 전체 공통 노출. 광고주는 시스템 UI에 진입하지 않는 외부 stakeholder.
+- **매장ID 격리**: 모든 데이터 조회·집계는 매장ID 스코프 강제 (v1 CR-1 그대로).
 
 ---
 
 ## 8. 다음 단계
 
-1. ✅ Requirements Analysis (본 문서)
-2. ▶ **User Stories** — 고객·관리자 페르소나, 스토리, Acceptance Criteria 도출
-3. Workflow Planning — 이후 단계(Application Design / Units / Construction) depth 결정
+1. ✅ Requirements Analysis Iteration 2 (본 문서)
+2. ▶ **constraints.md 갱신** (광고 항목 부분 해제 명시)
+3. ▶ **User Stories Iteration 3** — 영향 받는 v1 스토리 ~12개 재작성 + 신규 4~6개(QR 스캔, 공동 장바구니 동기화, 참가자 합류, 광고 슬롯) 도출
+4. Workflow Planning — 이후 단계 depth 결정

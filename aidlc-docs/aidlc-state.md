@@ -4,7 +4,11 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - User Stories Part 2 (Generation) 완료 — personas.md(4 페르소나) + stories.md(23 스토리) 생성, 사용자 승인 대기 (Approval Gate). P4 디지털 리터러시 부족 50대 고객 페르소나 + US-C0.1/0.2 스토리 보강 반영.
+- **Current Stage**: INCEPTION - **Requirements Analysis Iteration 2 (BYOD/QR + 광고) 완료** — requirements.md v2 + constraints.md 갱신 + 5문항 답변 완료. 사용자 승인 대기 (Approval Gate). 다음 = User Stories Iteration 3 재작성.
+
+## Version Markers
+- **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
+- **v2 (current)**: BYOD + QR 모델 — 진행 중
 
 ## Workspace State
 - **Existing Code**: No
@@ -37,8 +41,8 @@
 ### 🔵 INCEPTION PHASE
 - [x] Workspace Detection
 - [ ] Reverse Engineering (N/A — Greenfield)
-- [x] Requirements Analysis (9문항 답변 + requirements.md 작성 + 관리자 세션 16시간→30일 사용자 요청 반영, 사용자가 "다음 단계로 넘어가자"로 명시 승인)
-- [x] User Stories (Part 1 Plan 승인 + Part 2 personas.md/stories.md/INVEST/Persona·FR 매핑 생성, 사용자 승인 대기)
+- [x] Requirements Analysis (v1 — 9문항 답변 + requirements.md + 관리자 세션 30일 반영). **Iteration 2 진행 중 (v2 BYOD/QR)** — 신규 clarifying questions 5문항 답변 대기.
+- [x] User Stories (v1 — 4 페르소나 + 23 스토리, v1-shared-tablet 태그에 보존). v2 재작성은 Requirements Iteration 2 완료 후 진행.
 - [ ] Workflow Planning
 - [ ] Application Design
 - [ ] Units Generation

@@ -4,6 +4,33 @@
 
 ---
 
+## 🔖 ROLLBACK MARKER — v1 (공용 태블릿) → v2 (BYOD/QR) 전환
+
+**Decided At**: 2026-06-19T11:55:00Z
+**User Input (raw)**:
+> "지금 우리 테이블에 테블릿 화면이 설치되는 형태로 기획이 된건가? 그런데 우리는 QR 로 각자 메뉴를 확인하고 각자 모바일 디바이스에서 메뉴를 확인할 수도 있고 각자 주문을 넣을 수도 있는 형태로 변경하고 싶은데, 이렇게 변경하려고 하면 워크플로우 어느 단계를 수정하거나 다시 해봐야할까?"
+> 이어서 "그럼 거기로 돌아가자." + "혹시 다시 지금까지 했던 것으로 돌아올 수도 있는데, 이것도 다 기록이 되나?" → 옵션 A 선택.
+
+### v1 모델 (deprecated, 보존됨)
+- **Persona/Touchpoint**: 매장 테이블에 비치된 **공용 태블릿** 1대를 모든 손님이 공유
+- **인증**: 관리자가 1회 매장ID·테이블번호·테이블비번 입력 → localStorage 저장 → 손님은 자동 로그인
+- **세션**: 한 테이블 = 한 디바이스 = 한 세션 흐름
+- 마지막 산출물: Requirements Analysis 완료 + User Stories 23개(4 페르소나) 승인 대기 상태
+
+### v2 모델 (현재 진행)
+- **Persona/Touchpoint**: 손님 각자의 **본인 모바일 디바이스(BYOD)** + 테이블별 **QR 코드**
+- **인증**: 손님이 QR 스캔 → 임시 토큰 발급 → 본인 폰 세션 생성
+- **세션**: 한 테이블 = 한 테이블 세션 + N개 참가자(디바이스) 합류 가능
+- 시작 단계: Requirements Analysis **Iteration 2** — clarifying questions 5문항 재수집
+
+### 롤백 방법
+- **v1 산출물 조회**: `git show v1-shared-tablet:aidlc-docs/inception/requirements/requirements.md` 등
+- **v1 시점 비교**: `git diff v1-shared-tablet..HEAD`
+- **v1로 완전 복귀**: `git checkout v1-shared-tablet` (브랜치 분기 권장)
+- **태그 위치**: commit `4064878` (User Stories Iteration 2 — P4 페르소나 보강 직후)
+
+---
+
 ## Workflow Start — Initial Request
 **Timestamp**: 2026-06-19T01:41:25Z
 **User Input**: "prompt.md 로 시작하자."
@@ -90,6 +117,23 @@
 **Timestamp**: 2026-06-19T11:23:00Z
 **AI Response**: Story Generation Plan 승인 요청 메시지 사용자에게 제시 — Plan 내용 요약(3 페르소나 / Connextra / G-W-T / Feature-Based / Small 단위) + Section B 9단계 체크리스트 미리보기 + Approve/Request Changes 옵션. 승인 시 Part 2 Generation으로 진입.
 **Context**: INCEPTION - User Stories Part 1 Step 13. 사용자 plan 승인 대기.
+
+---
+
+## Requirements Analysis Iteration 2 — v2 작성 완료
+**Timestamp**: 2026-06-19T12:05:00Z
+**User Input**: "그럼 거기로 돌아가자. A 로 가자." → 옵션 A(덮어쓰기 + git tag 보존) 선택. 5문항 답변 라운드 1·2 수집(Q1~Q4 + Q5).
+**User Input (5문항 답변, raw)**: "Q1=공동 장바구니(테이블 세션 단위 1개) / Q2=테이블 전체(계산서 느낌) / Q3=테이블당 영구 고정 / Q4=모바일 웹만(PWA) / Q5=이번에 함께 포함(단방향 모두의주차장 배너 1~2개)"
+**Method**: 선택형 UI 두 라운드(4+1).
+**AI Response**:
+  - git tag `v1-shared-tablet` → origin push (commit 4064878).
+  - audit.md 최상단 ROLLBACK MARKER 섹션 추가 — v1/v2 모델 차이·롤백 방법 명시.
+  - aidlc-state.md Version Markers + Iteration 2 진입 표시.
+  - requirement-verification-questions-v2.md 생성 + 5문항 답변 기입 + Ambiguity 분석(vague 없음).
+  - requirements.md v2 완전 재작성 — FR-C1 QR 스캔 / FR-C3 공동 장바구니 + SSE / FR-C5 테이블 전체 가시성 / FR-C6 신규 광고 슬롯 / FR-A3 QR 발급·인쇄·무효화 / 데이터 모델 SessionParticipant·Cart·Advertisement 신규 / NFR-11 반응형·BYOD + NFR-12 동시성 신규.
+  - constraints.md 갱신 — 광고 기능 부분 해제(단방향 허용·풀 시스템 제외) + 푸시 알림 SSE 대체 명시 + 네이티브 앱 제외 신규 항목 추가.
+**확정 v2 사양**: BYOD(본인 폰) + QR 스캔 입장 + 영구 QR + 공동 장바구니(테이블 세션 1개) + 테이블 전체 주문 가시성 + 모바일 웹/PWA + 모두의주차장 단방향 배너.
+**Context**: INCEPTION - Requirements Analysis Iteration 2 완료. Approval Gate(승인 대기).
 
 ---
 
