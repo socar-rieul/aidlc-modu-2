@@ -129,6 +129,19 @@
 
 ---
 
+## U2 Customer Web — Design 3단계 압축 진행 (사용자 "빠르게" 요청)
+**Timestamp**: 2026-06-19T16:30:00Z
+**User Input (raw)**:
+> "진행해줘. 빠르게."
+**AI Response**: U1에서 권장안 다 채택해온 흐름 + 사용자 명시 "빠르게" 요청 → U2 Functional Design + NFR Requirements + NFR Design 세 단계를 권장안 적용 + 산출물 8종 + plan 3종 일괄 작성. AskUserQuestion 생략(권장안 그대로). Code Generation 진입 직전 사용자 한 번 게이트.
+**U2 권장 결정 요약**:
+- **Functional Design**: 라우터=react-router-dom v6 BrowserRouter / a11y 토글=localStorage + document.documentElement.classList + CSS 변수 + rem 토큰 / 도움말=첫 진입 자동 + help.completedAt localStorage 플래그
+- **NFR Requirements**: 빌드=Vite + React 18 + TanStack Query 5 + react-router-dom 6 + vite-plugin-pwa / 테스트=Vitest + RTL + MSW / 반응형 320~480px + PWA manifest + SW
+- **NFR Design**: useSseChannel(EventSource + invalidateQueries + setQueryData) / API client(fetch + X-Session-Token + 401→세션 폐기) / localStorage 훅(useSessionToken·useAccessibility·useHelp)
+**Context**: CONSTRUCTION - U2 design 3단계 일괄 완료 후 Code Generation Part 1 진입.
+
+---
+
 ## U1 Code Generation 승인 + 백엔드 e2e 검증 (사용자 요청)
 **Timestamp**: 2026-06-19T16:10:00Z
 **User Input (raw)**:

@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: **CONSTRUCTION - U1 Code Generation 검증 완료 (e2e 4/4 PASS), U2 사이클 진입 대기**. U1 Code Generation 사용자 명시 승인 + 실제 의존 설치·테스트 실행 검증. bcrypt→bcryptjs 교체(pnpm 11 build script 차단 회피), better-sqlite3 node-gyp 직접 빌드(Node 25 prebuild 없음), supertest import 정정 후 e2e 통과. 다음: U2 Customer Web Functional Design.
+- **Current Stage**: **CONSTRUCTION - U2 Customer Web design 3단계(Functional / NFR Req / NFR Design) 완료, Code Generation Part 1 진입 대기**. 사용자 "빠르게" 요청으로 권장안 일괄 적용 — Functional Design 4종(BL model + rules + entities + frontend-components) + NFR Req 2종(nfr-requirements + tech-stack) + NFR Design 2종(patterns + components) = 8 산출물 + 3 plan. 스택 = Vite + React 18 + TanStack Query 5 + react-router-dom 6 + vite-plugin-pwa + Vitest. 다음: U2 Code Generation.
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -55,8 +55,12 @@
 - [x] U1 Infrastructure Design — SKIP (로컬 한정 / NFR-8, execution-plan 결정)
 - [x] U1 Code Generation (Plan 18 단계 완료 — workspace + shared 13 + backend 39 + e2e 1. 2026-06-19 사용자 명시 승인)
 
-**U2 Customer Web (대기 — 사이클 진입 직전)**
-- [ ] U2 Functional Design / NFR Requirements / NFR Design / Code Generation — EXECUTE (Infrastructure SKIP)
+**U2 Customer Web (현재)**
+- [x] U2 Functional Design (4종 산출물 — 권장안 일괄 적용, 사용자 "빠르게" 요청)
+- [x] U2 NFR Requirements (2종 산출물 — Vite + React 18 + TanStack Query + Vitest)
+- [x] U2 NFR Design (2종 산출물 — useSseChannel + fetch wrapper + localStorage 훅)
+- [x] U2 Infrastructure Design — SKIP
+- [ ] U2 Code Generation — EXECUTE (Part 1 Plan 다음 진입)
 
 **U3 Admin Web (대기)**
 - [ ] U3 Functional Design / NFR Req / NFR Design / Code Generation — EXECUTE (Infrastructure SKIP)
