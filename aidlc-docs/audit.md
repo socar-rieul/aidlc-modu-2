@@ -93,6 +93,17 @@
 
 ---
 
+## User Stories Part 2 — P4 페르소나 + 스토리 보강 (Iteration 2)
+**Timestamp**: 2026-06-19T11:40:00Z
+**User Input**: "디지털리터러시가 부족한 50대 고객 페르소나, 유저스토리도 추가해줘."
+**AI Response**:
+  - personas.md: P4 "정희" (50대 후반, 디지털 친화도 하, 시인성·실수 방지·도움말 needs) 추가. 권한 모델 표에 P4 행 추가(P1과 동일 권한, UX 차이만).
+  - stories.md: 신규 2개 스토리 추가 — US-C0.1 (처음 사용자 도움말·튜토리얼) + US-C0.2 (큰 글자·고대비 모드 토글). NFR-4 확장 영역으로 분류. US-C4.1 AC에 "최종 확정 직전 강화 확인" 시나리오 추가(60×60px 큰 버튼·총액 큰 글자 요약). Persona 매핑표에 P4 컬럼 추가, US-C 전체 스토리에 P4 ● 매핑(US-C0.1/0.2는 P4 ●, P1 ○ — 1차/2차 사용자 구분). INVEST 표·NFR Traceability 갱신. 총 스토리 21 → 23.
+  - aidlc-state.md: 4 페르소나·23 스토리로 Current Stage 갱신.
+**Context**: INCEPTION - User Stories Part 2 Iteration 2 완료. Approval Gate 재유지(승인 대기).
+
+---
+
 ## User Stories Part 1 — Plan 승인 + Part 2 Generation 진입
 **Timestamp**: 2026-06-19T11:25:00Z
 **User Input**: "다음 진행해줘."

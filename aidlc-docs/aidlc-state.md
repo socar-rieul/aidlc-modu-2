@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - User Stories Part 2 (Generation) 완료 — personas.md + stories.md(21 스토리) 생성, 사용자 승인 대기 (Approval Gate)
+- **Current Stage**: INCEPTION - User Stories Part 2 (Generation) 완료 — personas.md(4 페르소나) + stories.md(23 스토리) 생성, 사용자 승인 대기 (Approval Gate). P4 디지털 리터러시 부족 50대 고객 페르소나 + US-C0.1/0.2 스토리 보강 반영.
 
 ## Workspace State
 - **Existing Code**: No
