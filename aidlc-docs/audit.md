@@ -120,6 +120,20 @@
 
 ---
 
+## User Stories Iteration 3 — v2 재작성 (BYOD/QR/공동장바구니/광고)
+**Timestamp**: 2026-06-19T12:30:00Z
+**User Input**: "다음으로 진행해줘."
+**AI Response**: v2 Requirements 승인 → User Stories Iteration 3 진입.
+  - personas.md v2: 사용 디바이스 BYOD 본인 폰으로 갱신(P1 진우·P4 정희), Voice·페인 포인트 보강(QR 스캔 장벽·일행 동시 사용 등). P4 권한 모델 표 확장(QR 스캔 입장·공동 장바구니 컬럼 추가).
+  - stories.md v2: v1 23 스토리 → v2 27 스토리 전면 재작성. 공통 비즈니스 룰 CR-1~CR-5 갱신 + CR-6(공동 장바구니 동시성) + CR-7(광고 단방향) 신규.
+    - 고객 13개: US-C0.1(도움말), US-C0.2(큰글자+시스템폰트), US-C1.1(QR 스캔 입장), US-C1.2(참가자 합류 가시화 — 신규), US-C2.1(반응형 메뉴 탐색), US-C3.1~3.4(공동 장바구니 추가·비우기·복원·동시성), US-C4.1·C4.2(주문 확정/실패 + SSE 동기화), US-C5.1(테이블 전체 내역), US-C6.1(광고 슬롯 — 신규).
+    - 관리자 14개: US-A1.1~1.3(인증·세션·시도제한), US-A2.1~2.5(SSE 모니터링 + 참가자 수), US-A3.1(QR 발급·인쇄·재발급 — 재작성), US-A3.2(직권 삭제 + SSE), US-A3.3(세션 종료 + 토큰 일괄 무효화), US-A3.4(과거 내역), US-A4.1~4.3(메뉴 관리).
+    - INVEST 체크 + Persona 매핑(P4 추가) + FR/NFR Traceability 갱신 — FR-C1~C6 + FR-A1~A4 모두 ≥1 스토리 커버, NFR-11/12 등 신규 NFR도 분산 커버.
+  - aidlc-state.md: User Stories Iteration 3 [x] + Current Stage 갱신.
+**Context**: INCEPTION - User Stories Iteration 3 완료. Approval Gate. 다음 = Workflow Planning.
+
+---
+
 ## Requirements Analysis Iteration 2 — v2 작성 완료
 **Timestamp**: 2026-06-19T12:05:00Z
 **User Input**: "그럼 거기로 돌아가자. A 로 가자." → 옵션 A(덮어쓰기 + git tag 보존) 선택. 5문항 답변 라운드 1·2 수집(Q1~Q4 + Q5).

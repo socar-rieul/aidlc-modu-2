@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - **Requirements Analysis Iteration 2 (BYOD/QR + 광고) 완료** — requirements.md v2 + constraints.md 갱신 + 5문항 답변 완료. 사용자 승인 대기 (Approval Gate). 다음 = User Stories Iteration 3 재작성.
+- **Current Stage**: INCEPTION - **User Stories Iteration 3 (v2 재작성) 완료** — personas.md v2(4 페르소나 디바이스·페인포인트 갱신) + stories.md v2(27 스토리, CR-1~CR-7) 작성. Approval Gate(사용자 승인 대기). 다음 = Workflow Planning.
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -42,7 +42,7 @@
 - [x] Workspace Detection
 - [ ] Reverse Engineering (N/A — Greenfield)
 - [x] Requirements Analysis (v1 — 9문항 답변 + requirements.md + 관리자 세션 30일 반영). **Iteration 2 진행 중 (v2 BYOD/QR)** — 신규 clarifying questions 5문항 답변 대기.
-- [x] User Stories (v1 — 4 페르소나 + 23 스토리, v1-shared-tablet 태그에 보존). v2 재작성은 Requirements Iteration 2 완료 후 진행.
+- [x] User Stories Iteration 3 (v2 — 4 페르소나 BYOD 갱신 + 27 스토리, CR-1~CR-7). v1(23 스토리)은 git tag `v1-shared-tablet`에 보존, 사용자 승인 대기.
 - [ ] Workflow Planning
 - [ ] Application Design
 - [ ] Units Generation
