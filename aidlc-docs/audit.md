@@ -129,6 +129,15 @@
 
 ---
 
+## U1 Backend NFR Design 승인 + Code Generation Part 1 진입
+**Timestamp**: 2026-06-19T15:40:00Z
+**User Input (raw)**:
+> "진행해줘."
+**AI Response**: 사용자 발언을 U1 NFR Design 최종 승인(Continue to Next Stage)으로 해석. Infrastructure Design은 execution-plan.md §3 결정대로 SKIP(NFR-8 로컬 한정). aidlc-state.md U1 NFR Design [x] 확정 + U1 Infrastructure Design SKIP 명시 + Current Stage → U1 Code Generation Part 1. construction/code-generation.md 룰 로드. u1-backend-code-generation-plan.md 작성 — Step 1~18 상세 단계(프로젝트 구조 셋업, shared 패키지, DB 엔티티, Common 인프라, 도메인 모듈 9개, Seed, AppModule+main.ts, 단위/e2e 테스트, 문서) + 스토리 traceability + 사용자 승인 게이트.
+**Context**: CONSTRUCTION - U1 NFR Design 승인 → U1 Infrastructure Design SKIP → U1 Code Generation Part 1 진입.
+
+---
+
 ## U1 Backend NFR Design — 답변 수집 + Step 6 산출물 2종 완료
 **Timestamp**: 2026-06-19T15:30:00Z
 **User Input (선택형 UI 응답, raw)**: "Q1=DataSource.transaction 직접 (권장) / Q2=클라이언트 책임 (권장)"
