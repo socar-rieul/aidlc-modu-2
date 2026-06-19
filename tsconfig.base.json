@@ -11,10 +11,6 @@
     "skipLibCheck": true,
     "declaration": true,
     "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@table-order/shared": ["packages/shared/src"],
-      "@table-order/shared/*": ["packages/shared/src/*"]
-    }
+    "baseUrl": "."
   }
 }

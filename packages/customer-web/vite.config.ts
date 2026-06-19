@@ -27,7 +27,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/qr': BACKEND,
+      '/qr/scan': BACKEND,
       '/menus': BACKEND,
       '/sessions': BACKEND,
       '/ads': BACKEND,
