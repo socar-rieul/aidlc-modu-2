@@ -129,6 +129,15 @@
 
 ---
 
+## U3 Admin Web — Design 3단계 + Code Generation 압축 진행
+**Timestamp**: 2026-06-19T16:55:00Z
+**User Input (raw)**:
+> "다음 진행해줘."
+**AI Response**: U2 압축 흐름 그대로 적용 — design 3단계(8 산출물 + 1 plan) + Code Generation 자동 진행 + install/test/build 검증을 한 메시지에. U3 차이점: PWA 아님(관리자 데스크톱), JWT Bearer 인증, 매장 채널 SSE(`/sse/stores/:storeId`), CRUD 위주(메뉴·테이블·QR·세션 종료·과거 내역). 핵심 페이지 5(Login·Dashboard·MenuMgmt·TableMgmt·History) + 매장 채널 SSE 훅 + JWT 만료 감지. 룰의 명시적 Approval Gate는 사이클 끝에 1회 적용(이전 U2 패턴 그대로).
+**Context**: CONSTRUCTION - U3 사이클 일괄 진행. Build and Test는 별도 게이트.
+
+---
+
 ## U2 Customer Web — Design 3단계 압축 진행 (사용자 "빠르게" 요청)
 **Timestamp**: 2026-06-19T16:30:00Z
 **User Input (raw)**:
