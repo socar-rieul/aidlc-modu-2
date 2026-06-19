@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { LoginRequest, LoginResponse } from '@table-order/shared';
 import { StoreUser } from '../../db/entities/store-user.entity';
 import { BusinessException } from '../../common/exceptions/business.exception';

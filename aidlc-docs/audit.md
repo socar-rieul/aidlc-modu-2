@@ -129,6 +129,25 @@
 
 ---
 
+## U1 Code Generation 승인 + 백엔드 e2e 검증 (사용자 요청)
+**Timestamp**: 2026-06-19T16:10:00Z
+**User Input (raw)**:
+> "다음으로 가자." → 이어서 "백엔드 테스트 돌려봤어? 안돌렸으면 돌려봐."
+**AI Response**: U2 Functional Design 진입 직전 사용자 요청으로 백엔드 e2e 실제 실행 검증. 다음 조정 후 4/4 테스트 통과:
+  - **bcrypt → bcryptjs** 교체 — pnpm 11이 native module build script를 기본 차단(`onlyBuiltDependencies` root 적용 제한). bcryptjs는 pure-JS라 의존 불필요. auth.service·seed.service 모두 import 변경.
+  - **better-sqlite3 native build** — Node 25용 prebuild binary 미배포 → node-gyp로 직접 빌드(Xcode CLT 사용). pnpm-workspace.yaml에 빈 packages만 남김.
+  - **supertest import 정정** — `import * as request` → `import request` (default import) 두 곳.
+  - **pnpm install/build 절차 확정**: `pnpm install` → `pnpm --filter @table-order/shared build`(tsc 직접) → 필요 시 better-sqlite3 node-gyp rebuild → `npx jest --config test/jest-e2e.json --runInBand`.
+**검증 결과 (4/4 PASS)**:
+  - 정상 흐름 (QR 스캔 → 메뉴 → 카트 추가 → 주문 확정 → 카트 비움 + 주문 내역): 28ms
+  - 빈 카트 주문 확정 거부 (CART_EMPTY 400): 2ms
+  - 관리자 로그인 + 대시보드 조회: 57ms
+  - 5회 실패 → 6번째 RATE_LIMITED: 268ms
+  - 합계 4 tests, 2.795s.
+**Context**: CONSTRUCTION - U1 Code Generation 검증 완료. U2 사이클은 다음 사용자 결정 후 진입.
+
+---
+
 ## U1 Backend Code Generation Part 2 — Step 1~18 완료
 **Timestamp**: 2026-06-19T16:00:00Z
 **AI Response**: Plan 18 단계 모두 자동 순차 실행 + plan 체크박스 [x] 18/18 갱신.
