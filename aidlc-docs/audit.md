@@ -129,6 +129,31 @@
 
 ---
 
+## U1 Backend Functional Design — 답변 수집 + Step 6 산출물 3종 완료
+**Timestamp**: 2026-06-19T14:50:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=단순화 (4xx 통합) / Q2=강제 종료 (권장) / Q3=활성 세션만 (권장)"
+**Method**: AskUserQuestion 선택형 UI 1라운드(3문항).
+**AI Response**:
+  - u1-backend-functional-design-plan.md 3개 [Answer] 태그 기입.
+  - Q1 답변 ambiguity(인증 가드 표준 응답 포함 여부) 합리 해소 — 가드 표준 401/403은 유지하고 비즈니스 사전 검증 실패만 400+errorCode 통합으로 plan Section C에 명확화 + business-rules.md §4.1에 반영. 423(rate-limited)도 400+errorCode+Retry-After header로 통합.
+  - Step 6 산출물 3종 생성 (`aidlc-docs/construction/u1-backend/functional-design/`):
+    - **business-logic-model.md**: 8 use-case 워크플로우(UC-1 QR 스캔·UC-2 카트 변경·UC-3 주문 확정·UC-4 세션 종료·UC-5 품절 토글·UC-6 QR 재발급·UC-7 직권 삭제·UC-8 메뉴 삭제) G/W/T + 트랜잭션 경계 + SSE 발화 시점 + v2.2 정합성 6건 통합.
+    - **business-rules.md**: CR-1~CR-7 cross-cutting + 도메인별 룰(Auth 4 / TableSession 6 / Menu 5 / Cart 6 / Order 6 / SSE 5 / Ads 4 / Admin 4) + 검증 정책(class-validator) + **errorCode 카탈로그 17종** + 트랜잭션·시드 룰.
+    - **domain-entities.md**: 13 엔티티 컬럼·인덱스·제약·관계·라이프사이클(Store / StoreUser / Table / TableSession / SessionParticipant / Cart / CartItem / Order / OrderItem / OrderHistory / Menu / MenuCategory / Advertisement) + 외래키 cascade 정책 표 + 시드 적재 순서.
+  - aidlc-state.md U1 Functional Design [x] + Current Stage 갱신.
+**Context**: CONSTRUCTION - U1 Functional Design Step 6 완료. Step 7 Approval Gate 직전.
+
+---
+
+## Units Generation 승인 + CONSTRUCTION U1 Backend Functional Design 진입
+**Timestamp**: 2026-06-19T14:40:00Z
+**User Input (raw)**:
+> "다음으로 진행해줘."
+**AI Response**: 사용자 발언을 Units Generation 최종 승인(Approve & Continue)으로 해석. aidlc-state.md Units Generation [x] 확정 + Current Stage → CONSTRUCTION PHASE - U1 Backend Functional Design Step 1~5. construction/functional-design.md 룰 로드. U1 Backend는 backend-only라 frontend-components.md 산출물 미작성 — 3종(business-logic-model / business-rules / domain-entities). u1-backend-functional-design-plan.md 작성 + 핵심 비즈니스 결정 임베디드 질문 2~3건(HTTP 에러 코드 카탈로그 / QR 재발급 시 활성 세션 처리 / 직권 삭제 시점 정책). AskUserQuestion 1라운드 → ambiguity 체크 → Step 6 산출물 생성.
+**Context**: INCEPTION 종료 → CONSTRUCTION 시작 (U1 Functional Design 진입).
+
+---
+
 ## Units Generation Part 1 — 답변 수집 + Part 2 산출물 3종 완료
 **Timestamp**: 2026-06-19T14:30:00Z
 **User Input (선택형 UI 응답, raw)**: "Q1=3 유닛 (권장) / Q2=순차 U1 → U2 → U3 (권장) / Q3=shared 패키지 + Application Design SSOT (권장)"
