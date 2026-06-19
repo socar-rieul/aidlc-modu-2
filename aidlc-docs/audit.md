@@ -129,6 +129,32 @@
 
 ---
 
+## Application Design — Step 6~10 완료 (답변 수집 + 산출물 5종)
+**Timestamp**: 2026-06-19T13:55:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=도메인별 모듈(권장) / Q2=REST+공유DTO(권장) / Q3=TypeORM / Q4=Q3 답변에 자동 매칭(권장) → class-validator / Q5=TanStack Query+useState(권장) / Q6=pnpm workspaces"
+**Method**: AskUserQuestion 선택형 UI 2라운드(Q1~Q4 + Q5~Q6) 수집.
+**AI Response**:
+  - application-design-plan.md 6개 [Answer] 태그 모두 기입 + Section C ambiguity 분석(vague/contradictory/missing 없음, follow-up 불필요).
+  - Step 10 산출물 5종 생성 (`aidlc-docs/inception/application-design/`):
+    - **components.md**: pnpm workspaces 4 패키지 구조 + 백엔드 NestJS 모듈 9 + CommonModule + 13 엔티티 매핑 + Customer/Admin React 컴포넌트 트리 + shared 패키지 DTO/SSE 이벤트 카탈로그.
+    - **component-methods.md**: REST 카탈로그 27개(고객 11 + 관리자 16) + SSE 이벤트 카탈로그 11개(세션 채널 6 + 매장 채널 5) + 8개 백엔드 service 메서드 시그니처 + Frontend hook 시그니처.
+    - **services.md**: 5개 use-case orchestration 상세(QR 스캔 / 카트 추가 / 주문 확정 / 세션 종료 / 품절 토글) + cross-cutting 정책(가드 체인 5종 / 트랜잭션 / SSE 채널 keep-alive 15초 / EventEmitter2 디커플링 / 시드 데이터) + 서비스↔스토리 traceability.
+    - **component-dependency.md**: 패키지 의존(mermaid) + NestJS 모듈 10×10 매트릭스(순환 의존 없음 확인) + 통신 패턴 6종 + 시퀀스 다이어그램 3개(QR 스캔 / 카트 추가+SSE / 주문 확정+이중 채널) + Frontend 단방향 의존 다이어그램.
+    - **application-design.md**: 위 4종 통합 단일 문서 — 시스템 개요·디자인 결정 요약·모듈·엔티티·통신·NFR 매핑·다음 단계.
+  - aidlc-state.md Current Stage 갱신 → Step 12 Approval Gate 대기.
+**Context**: INCEPTION - Application Design Step 10 완료, Step 12 Completion Gate 진입.
+
+---
+
+## Workflow Planning — 승인 + Application Design 진입
+**Timestamp**: 2026-06-19T13:42:00Z
+**User Input (raw)**:
+> "'신규 고객 BYOD 모바일 웹' 이게 뭐야?" → BYOD 용어 설명 → "다음 단계로 진행해줘."
+**AI Response**: 사용자 발언을 Workflow Planning 승인(Approve & Continue)으로 해석. aidlc-state.md Workflow Planning [x] 확정 + Current Stage → Application Design. inception/application-design.md 룰 로드 → Step 2~4 진입(application-design-plan.md 작성 + 6개 [Answer]: 임베드 질문 — Backend 모듈 구조 / API 스타일 / ORM / Validation / Frontend 상태 관리 / Project 구조). AskUserQuestion 선택형 UI 2라운드(4+2)로 답변 수집 예정.
+**Context**: INCEPTION - Workflow Planning 승인 → Application Design Step 6(답변 대기) 진입.
+
+---
+
 ## Workflow Planning — Step 1~8 실행 (execution-plan.md 작성)
 **Timestamp**: 2026-06-19T13:35:00Z
 **AI Response**: inception/workflow-planning.md 룰 로드. greenfield (Step 2.1·2.3·5 skip). Step 2.2 Change Impact / 2.4 Risk Assessment 수행. Step 3 phase 결정:
