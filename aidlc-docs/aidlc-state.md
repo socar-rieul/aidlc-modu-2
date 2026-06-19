@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - **Application Design — v2.2 리뷰 개정 완료, Approval Gate 대기**. (사용자 리뷰 요청 → C1 세션모델=첫 스캔 생성 등 정합성 결정 6건 확정 → 7종 문서 동기화 수정 완료) 6 디자인 결정 확정(NestJS 도메인별 / REST+공유DTO / TypeORM / class-validator / TanStack Query / pnpm workspaces). 산출물 5종 작성 — components.md(9 NestJS 모듈 + 13 엔티티 + Customer/Admin 컴포넌트 트리 + shared 패키지), component-methods.md(REST·SSE 카탈로그 + 서비스 메서드 시그니처), services.md(Use-Case 오케스트레이션 5개 + cross-cutting 가드/트랜잭션/SSE/EventEmitter2 정책), component-dependency.md(의존 매트릭스 + 시퀀스 다이어그램 3개), application-design.md(통합).
+- **Current Stage**: INCEPTION - **Units Generation 완료, Step 17 Approval Gate 대기**. Part 1: unit-of-work-plan.md 3 결정(3 유닛 / 순차 U1→U2→U3 / shared 패키지+Application Design SSOT) 확정. Part 2 산출물 3종 — unit-of-work.md(U1 Backend·U2 Customer PWA·U3 Admin SPA 정의 + pnpm workspaces 코드 조직 + 빌드 명령), unit-of-work-dependency.md(유닛 매트릭스 + 통신 패턴 + 빌드/실행 순서 + v2.2 정합성 6건 반영), unit-of-work-story-map.md(26 스토리 × 3 유닛 매핑 + 다중 유닛 협력 4 시나리오 + endpoint/SSE traceability).
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -45,7 +45,7 @@
 - [x] User Stories Iteration 3 v2.1 (BYOD 4 페르소나 + 26 스토리, CR-1~CR-7). v1(23 스토리)은 git tag `v1-shared-tablet`에 보존. 2026-06-19 사용자 명시 승인.
 - [x] Workflow Planning (execution-plan.md, 2026-06-19 사용자 명시 승인)
 - [x] Application Design (5종 산출물 완료 → **v2.2 리뷰 반영 개정**: C1 세션=첫 스캔 시 생성 / 빈 세션 어드민 종료·history 미기록 / session.started 스캔 발화 / /menus·/ads 가드·storeId 흐름·토큰 명칭·메뉴 삭제 409 등 정합성 수정. requirements·stories 동기화 포함)
-- [ ] Units Generation — EXECUTE (권장 3 유닛: U1 Backend / U2 Customer PWA / U3 Admin SPA)
+- [x] Units Generation (Part 1 plan + Part 2 산출물 3종 — 3 유닛 확정 / 순차 진행 / shared SSOT. Step 17 Approval Gate 대기)
 
 ### 🟢 CONSTRUCTION PHASE
 - [ ] Functional Design (per-unit) — EXECUTE

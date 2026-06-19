@@ -129,6 +129,31 @@
 
 ---
 
+## Units Generation Part 1 — 답변 수집 + Part 2 산출물 3종 완료
+**Timestamp**: 2026-06-19T14:30:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=3 유닛 (권장) / Q2=순차 U1 → U2 → U3 (권장) / Q3=shared 패키지 + Application Design SSOT (권장)"
+**Method**: AskUserQuestion 선택형 UI 1라운드(3문항). 모두 권장안 채택.
+**AI Response**:
+  - unit-of-work-plan.md Section A 3개 [Answer] 태그 기입 + Section C ambiguity 분석(vague/contradictory/missing 없음, follow-up 불필요).
+  - Part 2 산출물 3종 생성 (`aidlc-docs/inception/application-design/`):
+    - **unit-of-work.md**: 3 유닛 정의(U1 Backend / U2 Customer PWA / U3 Admin SPA) + 책임/스택/소속 모듈/엔티티/커버 스토리 + pnpm workspaces repository 구조 + 빌드 명령(shared → backend → customer-web → admin-web) + Construction 진행 순서(순차) + contract SSOT 위치.
+    - **unit-of-work-dependency.md**: 유닛×유닛 매트릭스(런타임 vs 빌드 타임 의존 구분) + 통신 패턴 5종 + 빌드/실행 순서(cold start 7단계) + v2.2 정합성 6건(세션·Cart 첫 스캔 동시 생성·테이블당 active unique·빈 세션 history 미기록·session.started 스캔 발화·/menus·/ads QrTokenGuard·메뉴 삭제 카트 포함 시 409) 반영.
+    - **unit-of-work-story-map.md**: 26 스토리 × 3 유닛 매트릭스(1차 책임 ●·협력 ○) + 다중 유닛 협력 4 시나리오(US-C4.1·A3.2·A3.3·A4.4) + Story↔NestJS 모듈↔Customer/Admin 페이지↔REST↔SSE traceability 표 + 유닛별 스토리 카운트 + Construction 진입 점검 체크리스트.
+  - aidlc-state.md Units Generation [x] 확정 + Current Stage 갱신.
+**Context**: INCEPTION - Units Generation Part 1·Part 2 완료. Step 16 Completion Gate(승인 대기) 직전.
+
+---
+
+## Application Design v2.2 — 승인 + Units Generation 진입
+**Timestamp**: 2026-06-19T14:20:00Z
+**User Input (raw)**:
+> "다음단계로 진행해줘."
+**Context-evidence**: 사용자가 직접 5종 산출물(application-design/*, plans/*, requirements/*, stories.md)을 외부 리뷰·개정해 v2.2 정합성 정정 완료(C1 세션모델 = 첫 스캔 시 생성·Cart 동시 생성·테이블당 활성 1개 unique / 빈 세션 어드민 종료 history 미기록 / session.started SSE 스캔 발화 / /menus·/ads 가드·storeId 흐름 / 토큰 명칭 정리 / 메뉴 삭제 카트 포함 시 409 / 스토리 25 → 26). aidlc-state.md Stage Progress 직접 갱신 + Application Design [x] 표시 확인.
+**AI Response**: 사용자 발언을 Application Design v2.2 최종 승인(Approve & Continue)으로 해석. aidlc-state.md Current Stage → Units Generation Part 1. inception/units-generation.md 룰 로드 → Part 1 Step 1~5 진입 — unit-of-work-plan.md 작성(임베디드 질문 2~3건: 유닛 분해 단위 / shared 패키지 취급 / 코드 생성 순서) → AskUserQuestion 1라운드 → 답변 수집 → Step 9 Plan Approval Gate.
+**Context**: INCEPTION - Application Design v2.2 승인 처리 → Units Generation Part 1 진입.
+
+---
+
 ## Application Design — Step 6~10 완료 (답변 수집 + 산출물 5종)
 **Timestamp**: 2026-06-19T13:55:00Z
 **User Input (선택형 UI 응답, raw)**: "Q1=도메인별 모듈(권장) / Q2=REST+공유DTO(권장) / Q3=TypeORM / Q4=Q3 답변에 자동 매칭(권장) → class-validator / Q5=TanStack Query+useState(권장) / Q6=pnpm workspaces"
