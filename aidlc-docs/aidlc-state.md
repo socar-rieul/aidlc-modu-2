@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: **CONSTRUCTION - U3 Admin Web 사이클 일괄 진행 중 (design + code + verify)**. U2 압축 패턴 그대로. 사이클 끝에 명시적 Approval Gate.
+- **Current Stage**: **CONSTRUCTION - Build and Test 완료, Approval Gate 대기**. 5종 instructions 작성 + 실제 검증 결과 통합. 다음: Operations(PLACEHOLDER).
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -62,9 +62,13 @@
 - [x] U2 Infrastructure Design — SKIP
 - [x] U2 Code Generation (packages/customer-web 전체 — vitest 1/1 PASS + vite build 220KB. Approval Gate 통과)
 
-**U3 Admin Web (현재)**
-- [ ] U3 Functional Design / NFR Req / NFR Design / Code Generation — EXECUTE (Infrastructure SKIP)
-- [ ] Build and Test — EXECUTE
+**U3 Admin Web (완료)**
+- [x] U3 Functional Design / NFR Req / NFR Design (8 산출물 + 1 plan)
+- [x] U3 Infrastructure Design — SKIP
+- [x] U3 Code Generation (packages/admin-web 전체 — vitest 4/4 + vite build 227KB)
+
+### Build and Test (완료)
+- [x] Build and Test (5종 instructions 작성 + 실제 검증 통합 — Backend e2e 4/4 + Customer Web vitest 1/1 + Admin Web vitest 4/4 = 9/9 PASS, vite production build 220KB + 227KB)
 
 ### 🟡 OPERATIONS PHASE
-- [ ] Operations (PLACEHOLDER — 배포 없음으로 생략 예정)
+- [ ] Operations (PLACEHOLDER — 배포 없음으로 생략 예정. Approval Gate 직전)

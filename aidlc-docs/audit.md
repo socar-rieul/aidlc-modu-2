@@ -129,6 +129,20 @@
 
 ---
 
+## Build and Test 단계 진입 + 5종 instructions 작성
+**Timestamp**: 2026-06-19T17:15:00Z
+**User Input (raw)**:
+> "다음단계 진행해줘."
+**AI Response**: U3 사이클 승인 + Build and Test 단계 진입. construction/build-and-test.md 룰 로드 → `aidlc-docs/construction/build-and-test/` 5종 작성:
+- build-instructions.md (pnpm install → shared build → backend native build → seed → 각 유닛 dev)
+- unit-test-instructions.md (backend Jest+Supertest, customer-web/admin-web Vitest+RTL)
+- integration-test-instructions.md (3 유닛 통합 시나리오 — QR 진입→카트→주문→대시보드 SSE 반영)
+- performance-test-instructions.md (PoC 미실시지만 SLO/SLI 정리 — NFR-1 ≤2초)
+- build-and-test-summary.md (실제 검증 결과 — U1 e2e 4/4 / U2 vitest 1/1 / U3 vitest 4/4 / vite build 220KB+227KB)
+**Context**: CONSTRUCTION - Build and Test 단계 완료. Operations 진입 직전 Approval Gate.
+
+---
+
 ## U3 Admin Web — Design 3단계 + Code Generation 압축 진행
 **Timestamp**: 2026-06-19T16:55:00Z
 **User Input (raw)**:
