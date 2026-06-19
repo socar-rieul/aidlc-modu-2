@@ -129,6 +129,29 @@
 
 ---
 
+## U1 Backend NFR Design — 답변 수집 + Step 6 산출물 2종 완료
+**Timestamp**: 2026-06-19T15:30:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=DataSource.transaction 직접 (권장) / Q2=클라이언트 책임 (권장)"
+**Method**: AskUserQuestion 선택형 UI 1라운드(2문항). 모두 권장안 채택.
+**AI Response**:
+  - u1-backend-nfr-design-plan.md 2개 [Answer] 태그 기입 + ambiguity 없음.
+  - Step 6 산출물 2종 생성:
+    - **nfr-design-patterns.md**: 6 패턴군 코드 스니펫 — (1) 가드 체인 5종(JwtAuthGuard / StoreScopeGuard / QrTokenGuard / SessionScopeGuard / RateLimitGuard) + 컨트롤러 적용 순서, (2) DataSource.transaction 직접 패턴 + cross-domain `manager?: EntityManager` 시그니처, (3) SSE Subject 레지스트리 + keep-alive 15초 + EventEmitter2 라우터(`@OnEvent` 8개), (4) HttpExceptionFilter + Global ValidationPipe + LoggingInterceptor + BusinessException, (5) bcrypt + UUIDv4 + JWT 30일 + PII 마스킹, (6) NFR↔패턴 매핑.
+    - **logical-components.md**: 15 컴포넌트 카탈로그 + 컴포넌트 상세(DataSource WAL · SSE Registry · EventEmitter2 · 가드 5종 · Filter/Interceptor/Pipe · CORS · Swagger · Seed Bootstrap · QR Image Service · ConfigModule) + 의존 그래프(mermaid) + 외부 인프라 0건 명시.
+  - aidlc-state.md U1 NFR Design [x] 갱신.
+**Context**: CONSTRUCTION - U1 NFR Design Step 6 완료. Step 7 Completion Gate 직전.
+
+---
+
+## U1 Backend NFR Requirements 승인 + NFR Design 진입
+**Timestamp**: 2026-06-19T15:20:00Z
+**User Input (raw)**:
+> "다음"
+**AI Response**: 사용자 발언을 U1 NFR Requirements 최종 승인(Continue to Next Stage)으로 해석. aidlc-state.md U1 NFR Requirements [x] 확정 + Current Stage → U1 NFR Design. construction/nfr-design.md 룰 로드. u1-backend-nfr-design-plan.md 작성 + 핵심 패턴 결정 2건 임베디드 질문(트랜잭션 helper 패턴 / SSE 재연결 reconcile 책임). AskUserQuestion 1라운드 → Step 6 산출물 2종(nfr-design-patterns.md + logical-components.md).
+**Context**: CONSTRUCTION - U1 NFR Requirements 승인 → U1 NFR Design 진입.
+
+---
+
 ## U1 Backend NFR Requirements — 답변 수집 + Step 6 산출물 2종 완료
 **Timestamp**: 2026-06-19T15:10:00Z
 **User Input (선택형 UI 응답, raw)**: "Q1=NestJS built-in Logger (권장) / Q2=Jest 단위 + Supertest e2e (권장) / Q3=파일 + WAL mode (권장)"

@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: **CONSTRUCTION - U1 Backend NFR Requirements Step 7 Approval Gate 대기**. 핵심 NFR 결정 3건(NestJS built-in Logger / Jest+Supertest e2e·커버리지 미강제 / SQLite 파일+WAL mode) 확정. 산출물 2종 작성 — nfr-requirements.md(6 카테고리 + NFR-1~NFR-12 U1 매핑 + SLO/SLI + Threat 모델), tech-stack-decisions.md(예상 package.json + tsconfig + DataSource WAL 설정 + main.ts 부트스트랩 + 의존 그래프 + 미사용 기술).
+- **Current Stage**: **CONSTRUCTION - U1 Backend NFR Design Step 7 Approval Gate 대기**. 핵심 패턴 결정 2건 확정(트랜잭션 helper = DataSource.transaction 직접 + manager 전달 / SSE reconcile = 클라이언트 책임 invalidateQueries). 산출물 2종 작성 — nfr-design-patterns.md(가드 5종 코드 + DataSource.transaction 트랜잭션 helper + SSE Subject 레지스트리·keep-alive·EventEmitter2 라우터 + HttpExceptionFilter·ValidationPipe·LoggingInterceptor + bcrypt/UUIDv4/JWT 시나리오), logical-components.md(15 컴포넌트 카탈로그 + DataSource WAL · SSE Registry · 가드 5종 · Swagger · Seed Bootstrap · QR Image Service · 외부 인프라 0건).
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -50,8 +50,8 @@
 ### 🟢 CONSTRUCTION PHASE (Per-Unit Loop)
 **U1 Backend (현재)**
 - [x] U1 Functional Design (3종 산출물 완료, 2026-06-19 사용자 명시 승인)
-- [x] U1 NFR Requirements (Step 7 Approval Gate 대기 — 2종 산출물 완료)
-- [ ] U1 NFR Design — EXECUTE
+- [x] U1 NFR Requirements (2종 산출물 완료, 2026-06-19 사용자 명시 승인)
+- [x] U1 NFR Design (Step 7 Approval Gate 대기 — 2종 산출물 완료)
 - [ ] U1 Infrastructure Design — SKIP (로컬 한정 / NFR-8)
 - [ ] U1 Code Generation — EXECUTE
 
