@@ -129,6 +129,33 @@
 
 ---
 
+## U1 Backend Code Generation Part 2 — Step 1~18 완료
+**Timestamp**: 2026-06-19T16:00:00Z
+**AI Response**: Plan 18 단계 모두 자동 순차 실행 + plan 체크박스 [x] 18/18 갱신.
+  - **Workspace 루트** (6 파일): package.json, pnpm-workspace.yaml, tsconfig.base.json, .gitignore, .editorconfig, .env.example
+  - **packages/shared** (13 파일): package.json, tsconfig.json, README.md, src/{enums×2 + dto×8 + sse-events×2 + index.ts}. class-validator 데코레이션 + SessionSseEvent/StoreSseEvent union.
+  - **packages/backend** (~39 파일):
+    - 설정: package.json, tsconfig×2, nest-cli.json, jest.config.js, test/jest-e2e.json, .eslintrc, .prettierrc, .gitignore, README.md
+    - db/data-source.ts + entities/×13 + index.ts (WAL/synchronous/foreign_keys PRAGMA, partial unique 룰 명시)
+    - common/{exceptions, filters, interceptors, guards×5, common.module.ts}
+    - modules/{auth, store, table, menu, cart, order, sse, ads, admin} — service + controller + module (9 도메인)
+    - seed/{seed.service, seed.module, seed.cli.ts} — 데모 매장 + 5 테이블 + 12 메뉴 + 2 광고 idempotent
+    - app.module.ts + main.ts (CORS + Swagger + ValidationPipe + HttpExceptionFilter + LoggingInterceptor)
+  - **e2e** (1 spec): test/qr-cart-order.e2e-spec.ts — QR 스캔→카트→주문 풀 흐름 + CART_EMPTY + 관리자 로그인+대시보드 + RATE_LIMITED 4 시나리오
+  - **Markdown summary**: aidlc-docs/construction/u1-backend/code/code-generation-summary.md
+  - 모든 application 코드는 `packages/` 안, `aidlc-docs/`엔 summary만.
+**Context**: CONSTRUCTION - U1 Code Generation Part 2 완료. Step 14 (룰) Completion Message 직전.
+
+---
+
+## U1 Backend Code Generation Part 1 승인 + Part 2 자동 진행
+**Timestamp**: 2026-06-19T15:50:00Z
+**User Input (선택형 UI 응답, raw)**: "자동 진행 (권장)"
+**AI Response**: Plan 18 단계 승인 + Part 2 자동 진행 모드 결정. aidlc-state.md Code Generation Part 1 [x] + Current Stage → Part 2 Step 10~13 실행. plan 체크박스를 각 단계 완료마다 [x] 갱신. Step 14에서 통합 summary 제시 + 사용자 최종 승인.
+**Context**: CONSTRUCTION - U1 Code Generation Part 2 시작.
+
+---
+
 ## U1 Backend NFR Design 승인 + Code Generation Part 1 진입
 **Timestamp**: 2026-06-19T15:40:00Z
 **User Input (raw)**:

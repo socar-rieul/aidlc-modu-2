@@ -1,0 +1,19 @@
+{
+  "name": "@table-order/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo 'no tests for shared'"
+  },
+  "dependencies": {
+    "class-validator": "^0.14.1",
+    "class-transformer": "^0.5.1",
+    "reflect-metadata": "^0.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

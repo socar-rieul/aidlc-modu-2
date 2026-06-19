@@ -43,7 +43,7 @@
 - `.editorconfig` (utf-8, lf, indent_size 2)
 - `.env.example` (PORT, DB_PATH, JWT_SECRET, CORS_ORIGINS, LOG_LEVEL)
 
-- [ ] Step 1 완료
+- [x] Step 1 완료
 
 ### Step 2 — `packages/shared` 패키지 (DTO + SSE 타입)
 
@@ -66,7 +66,7 @@
 
 각 DTO에 class-validator 데코레이션 부착 (Functional Design business-rules.md §3 표 그대로).
 
-- [ ] Step 2 완료
+- [x] Step 2 완료
 
 ### Step 3 — `packages/backend` 프로젝트 셋업
 
@@ -79,7 +79,7 @@
 - `packages/backend/.gitignore`
 - `packages/backend/data/.gitkeep` (SQLite 파일 위치)
 
-- [ ] Step 3 완료
+- [x] Step 3 완료
 
 ### Step 4 — DB DataSource + Entities (TypeORM)
 
@@ -103,7 +103,7 @@
 
 엔티티는 [`domain-entities.md`](../u1-backend/functional-design/domain-entities.md) 컬럼·인덱스·제약·cascade 그대로 매핑. **TableSession에 partial unique** `(tableId WHERE status='ACTIVE')` 적용.
 
-- [ ] Step 4 완료
+- [x] Step 4 완료
 
 ### Step 5 — Common 인프라 (가드·필터·인터셉터·파이프)
 
@@ -118,7 +118,7 @@
 - `guards/rate-limit.guard.ts`
 - `common.module.ts` — 위 provider export
 
-- [ ] Step 5 완료
+- [x] Step 5 완료
 
 ### Step 6 — AuthModule
 
@@ -130,14 +130,14 @@
 - `dto/` (shared에서 re-export)
 - 단위 테스트 `auth.service.spec.ts` — login success/실패/lock 시나리오
 
-- [ ] Step 6 완료
+- [x] Step 6 완료
 
 ### Step 7 — StoreModule
 
 생성:
 - `store.module.ts`, `store.service.ts` (assertActive 등 read), `store.repository.ts`
 
-- [ ] Step 7 완료
+- [x] Step 7 완료
 
 ### Step 8 — TableModule
 
@@ -148,7 +148,7 @@
 - `admin-table.controller.ts` (관리자 측 — POST `/admin/tables`, POST `/admin/tables/:id/qr/regenerate`, GET `/admin/tables/:id/qr.png|pdf`, POST `/admin/tables/:id/session/close`, GET `/admin/tables`)
 - 단위 테스트 `table.service.spec.ts` — UC-1·UC-4·UC-6 핵심 시나리오 mock
 
-- [ ] Step 8 완료
+- [x] Step 8 완료
 
 ### Step 9 — MenuModule
 
@@ -159,7 +159,7 @@
 - `admin-menu.controller.ts` (POST/PATCH/DELETE/PATCH sort/PATCH soldout)
 - 단위 테스트 `menu.service.spec.ts` — UC-5·UC-8 + 가격 검증 + soldout 보존
 
-- [ ] Step 9 완료
+- [x] Step 9 완료
 
 ### Step 10 — CartModule
 
@@ -169,7 +169,7 @@
 - `cart.controller.ts` — GET/POST/PATCH/DELETE 5종
 - 단위 테스트 `cart.service.spec.ts` — UC-2 + CR-6 version 단조 증가 + 품절 거부
 
-- [ ] Step 10 완료
+- [x] Step 10 완료
 
 ### Step 11 — OrderModule
 
@@ -180,7 +180,7 @@
 - `admin-order.controller.ts` (DELETE `/admin/orders/:id`, GET `/admin/history`)
 - 단위 테스트 `order.service.spec.ts` — UC-3 스냅샷 CR-4 + UC-7 ORDER_IN_HISTORY 거부
 
-- [ ] Step 11 완료
+- [x] Step 11 완료
 
 ### Step 12 — SseModule
 
@@ -191,7 +191,7 @@
 - `sse.controller.ts` — `@Sse('sessions/:sessionId')`, `@Sse('stores/:storeId')`
 - 단위 테스트 `sse.service.spec.ts` — emit/subscribe roundtrip
 
-- [ ] Step 12 완료
+- [x] Step 12 완료
 
 ### Step 13 — AdsModule
 
@@ -199,7 +199,7 @@
 - `ads.module.ts`, `ads.service.ts` (listActive(slot?)), `ads.controller.ts` (GET `/ads`)
 - 단위 테스트 `ads.service.spec.ts`
 
-- [ ] Step 13 완료
+- [x] Step 13 완료
 
 ### Step 14 — AdminModule (대시보드 read-only orchestration)
 
@@ -209,7 +209,7 @@
 - `admin-dashboard.controller.ts` — GET `/admin/dashboard`
 - 단위 테스트 `admin-dashboard.service.spec.ts`
 
-- [ ] Step 14 완료
+- [x] Step 14 완료
 
 ### Step 15 — Seed Bootstrap
 
@@ -218,7 +218,7 @@
 - `src/seed/seed.service.ts` — idempotent 시드 (Store 1, StoreUser 2, MenuCategory 3, Menu 12, Table 5 + qrToken, Advertisement 2)
 - `src/seed/seed.cli.ts` — NestFactory.createApplicationContext + run + exit (npm script `pnpm seed`)
 
-- [ ] Step 15 완료
+- [x] Step 15 완료
 
 ### Step 16 — AppModule + main.ts (부트스트랩)
 
@@ -226,7 +226,7 @@
 - `src/app.module.ts` — TypeOrmModule.forRoot + EventEmitterModule.forRoot + ConfigModule + 9 도메인 모듈 + CommonModule + AdsModule + SeedModule
 - `src/main.ts` — bootstrap (CORS·Swagger·ValidationPipe·HttpExceptionFilter·LoggingInterceptor·listen)
 
-- [ ] Step 16 완료
+- [x] Step 16 완료
 
 ### Step 17 — e2e 테스트 (Supertest)
 
@@ -239,7 +239,7 @@
 - `menu.e2e-spec.ts` — UC-5 (soldout fan-out) + UC-8 (MENU_IN_CART 409→400) + 가격 검증
 - `sse.e2e-spec.ts` — `cart.updated` SSE 수신 timing + 매장 채널 `order.created`
 
-- [ ] Step 17 완료
+- [x] Step 17 완료
 
 ### Step 18 — 문서 (markdown only) + README
 
@@ -248,7 +248,7 @@
 - `packages/backend/README.md` — quick start (`pnpm install` → `pnpm seed` → `pnpm dev`) + Swagger UI URL
 - `packages/shared/README.md` — DTO/SSE 타입 안내
 
-- [ ] Step 18 완료
+- [x] Step 18 완료
 
 ---
 

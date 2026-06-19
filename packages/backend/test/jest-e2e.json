@@ -1,0 +1,10 @@
+{
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "rootDir": "..",
+  "testRegex": "test/.*\\.e2e-spec\\.ts$",
+  "transform": { "^.+\\.ts$": "ts-jest" },
+  "moduleNameMapper": {
+    "^@table-order/shared$": "<rootDir>/../shared/src",
+    "^@table-order/shared/(.*)$": "<rootDir>/../shared/src/$1"
+  }
+}

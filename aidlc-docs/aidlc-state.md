@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: **CONSTRUCTION - U1 Backend Code Generation Part 1 Step 5~7 (Plan 승인 대기)**. U1 NFR Design 사용자 명시 승인. Infrastructure Design SKIP(execution-plan.md, NFR-8). u1-backend-code-generation-plan.md 작성 — 18 단계 상세 계획(프로젝트 구조 셋업·shared 패키지·DB·Common 인프라·도메인 모듈 9개·Seed·AppModule·테스트·문서) + 스토리 26개 traceability. Plan 승인 후 Part 2 (Step 10~13)에서 단계별 코드 생성.
+- **Current Stage**: **CONSTRUCTION - U1 Backend Code Generation Part 2 완료, Step 15 Approval Gate 대기**. Plan 18 단계 모두 [x] — workspace 루트 셋업·shared 패키지 13 파일·backend 39 파일(13 엔티티 + Common 5 + 9 도메인 모듈) + Seed + AppModule/main.ts + e2e 1 spec + README·summary. 총 ~60 파일 생성. `packages/{shared,backend}/` 안에 실제 코드 존재, `aidlc-docs/construction/u1-backend/code/code-generation-summary.md`는 markdown summary.
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -53,7 +53,7 @@
 - [x] U1 NFR Requirements (2종 산출물 완료, 2026-06-19 사용자 명시 승인)
 - [x] U1 NFR Design (2종 산출물 완료, 2026-06-19 사용자 명시 승인)
 - [x] U1 Infrastructure Design — SKIP (로컬 한정 / NFR-8, execution-plan 결정)
-- [ ] U1 Code Generation — EXECUTE (Part 1 Plan 작성 완료, Step 7 승인 대기)
+- [x] U1 Code Generation (Plan 18 단계 완료 — workspace + shared 13 + backend 39 + e2e 1. Step 15 Approval Gate 대기)
 
 **U2 Customer Web (대기)**
 - [ ] U2 Functional Design / NFR Req / NFR Design / Code Generation — EXECUTE (Infrastructure SKIP)
