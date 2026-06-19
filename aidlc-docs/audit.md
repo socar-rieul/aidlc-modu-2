@@ -129,6 +129,29 @@
 
 ---
 
+## U1 Backend NFR Requirements — 답변 수집 + Step 6 산출물 2종 완료
+**Timestamp**: 2026-06-19T15:10:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=NestJS built-in Logger (권장) / Q2=Jest 단위 + Supertest e2e (권장) / Q3=파일 + WAL mode (권장)"
+**Method**: AskUserQuestion 선택형 UI 1라운드(3문항). 모두 권장안 채택.
+**AI Response**:
+  - u1-backend-nfr-requirements-plan.md 3개 [Answer] 태그 기입 + ambiguity 없음 명시.
+  - Step 6 산출물 2종 생성:
+    - **nfr-requirements.md**: NFR-1~NFR-12를 U1 backend 관점에서 매핑 + 6 카테고리(Scalability·Performance·Availability·Security·Reliability·Maintainability·Usability) 정리 + SLO/SLI 6종 + Threat 모델(워크샵 수준) + NFR↔Use-case traceability.
+    - **tech-stack-decisions.md**: Application Design Q1~Q6 + Functional Design + NFR Q1~Q3 통합 stack 표 + 예상 package.json(backend + shared) + tsconfig.base + DataSource WAL 설정 + .env 예시 + main.ts 부트스트랩 윤곽 + 의존 그래프 + 미사용 기술(Java·GraphQL·Prisma·Zod·Helmet·Redis·pino·winston).
+  - aidlc-state.md U1 NFR Requirements [x] 갱신.
+**Context**: CONSTRUCTION - U1 NFR Requirements Step 6 완료. Step 7 Completion Gate 직전.
+
+---
+
+## U1 Backend Functional Design 승인 + NFR Requirements 진입
+**Timestamp**: 2026-06-19T15:00:00Z
+**User Input (raw)**:
+> "마음에들어 다음으로 진행해줘."
+**AI Response**: 사용자 발언을 U1 Functional Design 최종 승인(Continue to Next Stage)으로 해석. aidlc-state.md U1 Functional Design [x] 확정 + Current Stage → U1 NFR Requirements. construction/nfr-requirements.md 룰 로드. u1-backend-nfr-requirements-plan.md 작성 + 핵심 결정 3건 임베디드 질문(로그 라이브러리 / 테스트 전략 / SQLite WAL mode + 파일 위치). AskUserQuestion 1라운드 → Step 6 산출물 2종(nfr-requirements.md + tech-stack-decisions.md).
+**Context**: CONSTRUCTION - U1 Functional Design 승인 → U1 NFR Requirements 진입.
+
+---
+
 ## U1 Backend Functional Design — 답변 수집 + Step 6 산출물 3종 완료
 **Timestamp**: 2026-06-19T14:50:00Z
 **User Input (선택형 UI 응답, raw)**: "Q1=단순화 (4xx 통합) / Q2=강제 종료 (권장) / Q3=활성 세션만 (권장)"
