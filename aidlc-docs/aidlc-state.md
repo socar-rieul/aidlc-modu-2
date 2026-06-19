@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - **User Stories Iteration 3 v2.1 정리 완료** — 사용자 요청으로 US-C1.2/A2.4/A2.5 제거, US-C4.1 흐름 수정(주문번호 X → 주문내역 화면 이동), 신규 US-A4.4 메뉴 품절 토글 + Menu.soldout 컬럼 + US-C2.1/C3.1 AC 보강 + requirements.md FR-A2 단순화 + FR-A4 확장 + Out of Scope 보강. P2 페르소나 v1 잔재 "신규 태블릿 초기 설정" 제거. 총 27→25 스토리. Approval Gate 유지.
+- **Current Stage**: INCEPTION - **Workflow Planning Step 9 — Approval Gate 대기**. User Stories v2.1 (25 스토리, 4 페르소나, BYOD/QR) 사용자 명시 승인 완료. execution-plan.md 작성 — App Design/Units Generation EXECUTE, Functional Design/NFR Req/NFR Design EXECUTE per-unit, Infrastructure Design SKIP(로컬 한정), Code Gen/Build & Test EXECUTE, Operations PLACEHOLDER. 권장 3 유닛 (U1 Backend / U2 Customer PWA / U3 Admin SPA).
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
@@ -41,19 +41,19 @@
 ### 🔵 INCEPTION PHASE
 - [x] Workspace Detection
 - [ ] Reverse Engineering (N/A — Greenfield)
-- [x] Requirements Analysis (v1 — 9문항 답변 + requirements.md + 관리자 세션 30일 반영). **Iteration 2 진행 중 (v2 BYOD/QR)** — 신규 clarifying questions 5문항 답변 대기.
-- [x] User Stories Iteration 3 (v2 — 4 페르소나 BYOD 갱신 + 27 스토리, CR-1~CR-7). v1(23 스토리)은 git tag `v1-shared-tablet`에 보존, 사용자 승인 대기.
-- [ ] Workflow Planning
-- [ ] Application Design
-- [ ] Units Generation
+- [x] Requirements Analysis (v1 9문항 + v2 5문항 종합, requirements.md v2 BYOD/QR/공동 장바구니/광고)
+- [x] User Stories Iteration 3 v2.1 (BYOD 4 페르소나 + 25 스토리, CR-1~CR-7). v1(23 스토리)은 git tag `v1-shared-tablet`에 보존. 2026-06-19 사용자 명시 승인.
+- [x] Workflow Planning (execution-plan.md 작성 완료) — Step 9 Approval Gate 대기
+- [ ] Application Design — EXECUTE
+- [ ] Units Generation — EXECUTE (권장 3 유닛: U1 Backend / U2 Customer PWA / U3 Admin SPA)
 
 ### 🟢 CONSTRUCTION PHASE
-- [ ] Functional Design (per-unit)
-- [ ] NFR Requirements (per-unit)
-- [ ] NFR Design (per-unit)
-- [ ] Infrastructure Design (per-unit)
-- [ ] Code Generation (per-unit)
-- [ ] Build and Test
+- [ ] Functional Design (per-unit) — EXECUTE
+- [ ] NFR Requirements (per-unit) — EXECUTE
+- [ ] NFR Design (per-unit) — EXECUTE
+- [ ] Infrastructure Design (per-unit) — SKIP (로컬 한정 / NFR-8)
+- [ ] Code Generation (per-unit) — EXECUTE
+- [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations (PLACEHOLDER — 배포 없음으로 생략 예정)

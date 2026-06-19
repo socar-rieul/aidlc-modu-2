@@ -120,6 +120,29 @@
 
 ---
 
+## User Stories Iteration 3 v2.1 — 승인 + Workflow Planning 진입
+**Timestamp**: 2026-06-19T13:30:00Z
+**User Input (raw)**:
+> "ai dlc 에서 테이블오더 만드는 작업 하고 있고, qr 코드로 메뉴확인 주문하는 걸로 유저스토리까지 완료했어. 다음으로 넘어가줘."
+**AI Response**: 사용자 발언을 User Stories v2.1 (25 스토리, 4 페르소나, BYOD/QR) 최종 승인으로 해석. aidlc-state.md User Stories Iteration 3 [x] 확정 + Current Stage → Workflow Planning. Workflow Planning Step 1~8 진입 — prior context(requirements.md v2 + stories.md v2 + personas.md v2) 로드 → 변경 영향 분석 → phase 결정 → execution-plan.md 작성.
+**Context**: INCEPTION - User Stories Approval 처리 완료 → Workflow Planning 진입.
+
+---
+
+## Workflow Planning — Step 1~8 실행 (execution-plan.md 작성)
+**Timestamp**: 2026-06-19T13:35:00Z
+**AI Response**: inception/workflow-planning.md 룰 로드. greenfield (Step 2.1·2.3·5 skip). Step 2.2 Change Impact / 2.4 Risk Assessment 수행. Step 3 phase 결정:
+  - Application Design: **EXECUTE** — 7개 데이터 모델 + SSE 채널 + QR/세션 라이프사이클 → 신규 컴포넌트·서비스 다수.
+  - Units Generation: **EXECUTE** — 백엔드 NestJS + 고객 BYOD 웹 + 관리자 대시보드 → 다중 모듈 분해 필요. **3 유닛 권장** (워크샵 PoC 범위).
+  - Functional Design / NFR Requirements / NFR Design: **EXECUTE per-unit** — 공동 장바구니 동시성·SSE·bcrypt·반응형 NFR이 명시적이라 design 단계 필요.
+  - Infrastructure Design: **SKIP** — "로컬만 실행" 제약으로 클라우드/배포 인프라 없음. 로컬 기동 절차는 Build and Test 산출물에 흡수.
+  - Code Generation / Build and Test: **EXECUTE** (ALWAYS).
+  - Operations: PLACEHOLDER.
+  Step 6 Mermaid workflow visualization + Step 7 execution-plan.md 작성 (Risk=Medium, Timeline=워크샵 1세션).
+**Context**: INCEPTION - Workflow Planning Step 7 완료. Step 9 Approval Gate 직전.
+
+---
+
 ## User Stories Iteration 3 v2.1 — 단순화·품절·흐름 수정 + P2 페르소나 잔재 제거
 **Timestamp**: 2026-06-19T13:00:00Z
 **User Input (raw)**:
