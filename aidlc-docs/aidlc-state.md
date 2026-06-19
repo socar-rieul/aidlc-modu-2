@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - **User Stories Iteration 3 (v2 재작성) 완료** — personas.md v2(4 페르소나 디바이스·페인포인트 갱신) + stories.md v2(27 스토리, CR-1~CR-7) 작성. Approval Gate(사용자 승인 대기). 다음 = Workflow Planning.
+- **Current Stage**: INCEPTION - **User Stories Iteration 3 v2.1 정리 완료** — 사용자 요청으로 US-C1.2/A2.4/A2.5 제거, US-C4.1 흐름 수정(주문번호 X → 주문내역 화면 이동), 신규 US-A4.4 메뉴 품절 토글 + Menu.soldout 컬럼 + US-C2.1/C3.1 AC 보강 + requirements.md FR-A2 단순화 + FR-A4 확장 + Out of Scope 보강. P2 페르소나 v1 잔재 "신규 태블릿 초기 설정" 제거. 총 27→25 스토리. Approval Gate 유지.
 
 ## Version Markers
 - **v1 (deprecated, 보존됨)**: 공용 태블릿 모델 — git tag `v1-shared-tablet` (commit 4064878)
