@@ -76,3 +76,19 @@
 **Context**: INCEPTION - User Stories Part 1 Step 7(질문 제시). 사용자 답변 대기.
 
 ---
+
+## User Stories Part 1 — Clarifying Questions 답변 수집 (5문항)
+**Timestamp**: 2026-06-19T11:22:00Z
+**User Input (선택형 UI 응답, raw)**: "Q1=3개(고객+점주+알바생) / Q2=Connextra As a/I want/so that + AC / Q3=Given/When/Then (Gherkin) / Q4=Feature-Based (FR 단위 1:N) / Q5=세부 단위(Small) 한 화면=1 스토리"
+**Method**: AskUserQuestion 선택형 UI 두 라운드(Q1~Q4 + Q5)로 수집.
+**AI Response**: story-generation-plan.md의 5개 [Answer] 태그 모두 기입. Step 9 Ambiguity 분석 → vague/contradictory/missing 응답 없음(모두 명확한 단일 선택). Step 10 follow-up 불필요. → Step 12 Plan Approval Gate 진행.
+**Context**: INCEPTION - User Stories Part 1 Step 12. Plan 승인 대기.
+
+---
+
+## User Stories Part 1 — Plan Approval Gate Prompt
+**Timestamp**: 2026-06-19T11:23:00Z
+**AI Response**: Story Generation Plan 승인 요청 메시지 사용자에게 제시 — Plan 내용 요약(3 페르소나 / Connextra / G-W-T / Feature-Based / Small 단위) + Section B 9단계 체크리스트 미리보기 + Approve/Request Changes 옵션. 승인 시 Part 2 Generation으로 진입.
+**Context**: INCEPTION - User Stories Part 1 Step 13. 사용자 plan 승인 대기.
+
+---
