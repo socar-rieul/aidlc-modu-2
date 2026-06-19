@@ -1,0 +1,31 @@
+:root {
+  --font-scale: 1;
+  --bg: #ffffff;
+  --fg: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-fg: #ffffff;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --border: #e5e7eb;
+  --card: #ffffff;
+  --card-fg: #1f2937;
+  --soldout: #9ca3af;
+  --tap-min: 44px;
+}
+
+html.large-text {
+  --font-scale: 1.5;
+  --tap-min: 60px;
+}
+
+html.high-contrast {
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #d1d5db;
+  --primary: #facc15;
+  --primary-fg: #000000;
+  --border: #facc15;
+  --card: #111827;
+  --card-fg: #ffffff;
+}
