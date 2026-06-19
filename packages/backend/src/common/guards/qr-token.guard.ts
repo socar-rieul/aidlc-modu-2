@@ -12,7 +12,8 @@ export class QrTokenGuard implements CanActivate {
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest();
-    const token = req.headers['x-session-token'] as string | undefined;
+    // EventSource는 헤더를 못 보내므로 query.token도 fallback으로 허용
+    const token = (req.headers['x-session-token'] as string | undefined) ?? (req.query?.token as string | undefined);
     if (!token) throw new UnauthorizedException('TOKEN_MISSING');
     const repo = this.ds.getRepository(SessionParticipant);
     const sp = await repo.findOne({ where: { token, revokedAt: IsNull() } });

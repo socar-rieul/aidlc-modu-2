@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { CartDto, OrderDto } from '@table-order/shared';
-import { clearSession } from './useSessionToken';
+import { clearSession, getSessionToken } from './useSessionToken';
 
 export function useSseChannel(sessionId: string | null, onSessionClosed?: () => void): void {
   const qc = useQueryClient();
 
   useEffect(() => {
     if (!sessionId) return;
-    const es = new EventSource(`/sse/sessions/${sessionId}`);
+    const token = getSessionToken();
+    if (!token) return;
+    const es = new EventSource(`http://localhost:3000/sse/sessions/${sessionId}?token=${encodeURIComponent(token)}`);
 
     es.onopen = () => {
       qc.invalidateQueries({ queryKey: ['cart', sessionId] });
