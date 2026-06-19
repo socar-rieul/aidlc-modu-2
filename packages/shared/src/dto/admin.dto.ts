@@ -1,10 +1,16 @@
 import { IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
+export class OrderPreviewItemDto {
+  menuName!: string;
+  unitPrice!: number;
+  quantity!: number;
+}
+
 export class OrderPreviewDto {
   id!: string;
   total!: number;
   createdAt!: string;
-  topItem?: { menuName: string; quantity: number };
+  items!: OrderPreviewItemDto[];
 }
 
 export class TableCardDto {

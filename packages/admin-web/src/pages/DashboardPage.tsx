@@ -58,7 +58,8 @@ export function DashboardPage() {
                   <p className="preview">주문 {t.recentOrders.length}건</p>
                   {t.recentOrders.slice(0, 2).map((o) => (
                     <p key={o.id} className="preview">
-                      · {o.topItem ? `${o.topItem.menuName} × ${o.topItem.quantity}` : ''} ({o.total.toLocaleString()}원)
+                      · {o.items.slice(0, 2).map((it) => `${it.menuName}×${it.quantity}`).join(', ')}
+                      {o.items.length > 2 ? ` 외 ${o.items.length - 2}` : ''} ({o.total.toLocaleString()}원)
                     </p>
                   ))}
                 </>
@@ -91,10 +92,14 @@ export function DashboardPage() {
                     <strong>{new Date(o.createdAt).toLocaleTimeString()}</strong>
                     <strong>{o.total.toLocaleString()}원</strong>
                   </div>
-                  {o.topItem && (
-                    <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
-                      대표: {o.topItem.menuName} × {o.topItem.quantity}
-                    </p>
+                  {o.items.length > 0 && (
+                    <ul style={{ color: 'var(--muted)', fontSize: '0.875rem', paddingLeft: '1.25rem', marginTop: '0.25rem' }}>
+                      {o.items.map((it, idx) => (
+                        <li key={idx}>
+                          {it.menuName} × {it.quantity} ({(it.unitPrice * it.quantity).toLocaleString()}원)
+                        </li>
+                      ))}
+                    </ul>
                   )}
                   <button
                     className="danger"

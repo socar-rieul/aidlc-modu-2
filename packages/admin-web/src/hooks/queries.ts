@@ -27,7 +27,10 @@ export function useDashboardQuery() {
   return useQuery({
     queryKey: ['dashboard'],
     queryFn: () => api.get<DashboardDto>('/admin/dashboard'),
-    staleTime: 30_000,
+    // SSE 정상 동작 시 즉시 invalidate되지만, 안전망으로 5초 polling 병행
+    refetchInterval: 5_000,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
   });
 }
 

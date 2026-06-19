@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, IsNull } from 'typeorm';
-import { DashboardDto, OrderPreviewDto, SessionStatus, TableCardDto } from '@table-order/shared';
+import { DashboardDto, OrderPreviewDto, OrderPreviewItemDto, SessionStatus, TableCardDto } from '@table-order/shared';
 import { Table } from '../../db/entities/table.entity';
 import { TableSession } from '../../db/entities/table-session.entity';
 import { Order } from '../../db/entities/order.entity';
@@ -39,14 +39,16 @@ export class AdminDashboardService {
         const recent: OrderPreviewDto[] = await Promise.all(
           orders.map(async (o) => {
             const items = await this.ds.getRepository(OrderItem).find({ where: { orderId: o.id } });
-            const top = items[0];
+            const itemsDto: OrderPreviewItemDto[] = items.map((i) => ({
+              menuName: i.menuNameSnapshot,
+              unitPrice: i.unitPriceSnapshot,
+              quantity: i.quantity,
+            }));
             return {
               id: o.id,
               total: o.total,
               createdAt: o.createdAt.toISOString(),
-              topItem: top
-                ? { menuName: top.menuNameSnapshot, quantity: top.quantity }
-                : undefined,
+              items: itemsDto,
             };
           }),
         );

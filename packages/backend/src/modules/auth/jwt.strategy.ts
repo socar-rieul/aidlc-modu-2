@@ -14,7 +14,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const secret = config.get<string>('JWT_SECRET');
     if (!secret) throw new UnauthorizedException('JWT_SECRET missing');
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // EventSource는 헤더를 못 보내므로 ?token=… query도 fallback으로 허용
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromUrlQueryParameter('token'),
+      ]),
       secretOrKey: secret,
     });
   }
