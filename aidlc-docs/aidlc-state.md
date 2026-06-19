@@ -4,7 +4,7 @@
 - **Project Name**: 테이블오더 서비스 (Table Order Service)
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-19T01:41:25Z
-- **Current Stage**: INCEPTION - User Stories Part 1 (Planning) 진입 — Assessment + Story Plan 작성 후 질문 답변 대기
+- **Current Stage**: INCEPTION - User Stories Part 2 (Generation) 완료 — personas.md + stories.md(21 스토리) 생성, 사용자 승인 대기 (Approval Gate)
 
 ## Workspace State
 - **Existing Code**: No
@@ -38,7 +38,7 @@
 - [x] Workspace Detection
 - [ ] Reverse Engineering (N/A — Greenfield)
 - [x] Requirements Analysis (9문항 답변 + requirements.md 작성 + 관리자 세션 16시간→30일 사용자 요청 반영, 사용자가 "다음 단계로 넘어가자"로 명시 승인)
-- [ ] User Stories (Part 1 Planning 진행 중)
+- [x] User Stories (Part 1 Plan 승인 + Part 2 personas.md/stories.md/INVEST/Persona·FR 매핑 생성, 사용자 승인 대기)
 - [ ] Workflow Planning
 - [ ] Application Design
 - [ ] Units Generation
