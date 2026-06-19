@@ -17,8 +17,8 @@
 
 | Method | Path | DTO 입력 | DTO 응답 | 가드 | 관련 스토리 |
 |--------|------|----------|----------|------|-------------|
-| POST | `/qr/scan/:token` | — | `QrScanResponse { sessionToken, sessionId, storeName, tableNumber }` | (public) | US-C1.1 |
-| GET | `/menus` | query `storeId` | `MenuDto[]` (category·soldout 포함) | `StoreScopeGuard` | US-C2.1 |
+| POST | `/qr/scan/:token` | — | `QrScanResponse { sessionToken, sessionId, storeId, storeName, tableNumber }` (sessionId·storeId **non-null** — 스캔 시 세션 생성/합류) | (public) | US-C1.1 |
+| GET | `/menus` | — (storeId는 세션 토큰에서 도출) | `MenuDto[]` (category·soldout 포함) | `QrTokenGuard` | US-C2.1 |
 | GET | `/ads` | query `slot` | `AdvertisementDto[]` (active only) | (public) | US-C6.1 |
 | GET | `/sessions/:sessionId/cart` | — | `CartDto { version, items[], total }` | `QrTokenGuard` + `SessionScopeGuard` | US-C3.3 |
 | POST | `/sessions/:sessionId/cart/items` | `AddCartItemDto { menuId, quantity }` | `CartDto` (새 버전) | 동상 | US-C3.1 |
@@ -35,16 +35,17 @@
 |--------|------|----------|----------|------|-------------|
 | POST | `/admin/auth/login` | `LoginRequest { storeId, username, password }` | `LoginResponse { jwt, expiresAt }` | (public) + RateLimit (NFR-3) | US-A1.1, A1.3 |
 | POST | `/admin/auth/logout` | — | 204 | `JwtAuthGuard` | (보조) |
-| GET | `/admin/dashboard` | — | `DashboardDto { tables[], adsRead-only }` | `JwtAuthGuard` + `StoreScopeGuard` | US-A2.1~A2.3 |
+| GET | `/admin/dashboard` | — | `DashboardDto { tables[] }` (테이블별 활성 세션·주문 집계, 광고 없음) | `JwtAuthGuard` + `StoreScopeGuard` | US-A2.1~A2.3 |
 | GET | `/admin/menus` | — | `MenuDto[]` | 동상 | US-A4.* |
 | POST | `/admin/menus` | `CreateMenuDto` | `MenuDto` | 동상 | US-A4.1 |
 | PATCH | `/admin/menus/:id` | `UpdateMenuDto` | `MenuDto` | 동상 | US-A4.2 |
-| DELETE | `/admin/menus/:id` | — | 204 | 동상 | US-A4.2 |
+| DELETE | `/admin/menus/:id` | — | 204 (활성 카트 참조 시 **409**) | 동상 | US-A4.2 |
 | PATCH | `/admin/menus/sort` | `MenuSortDto { ids[] }` | `MenuDto[]` | 동상 | US-A4.3 |
 | PATCH | `/admin/menus/:id/soldout` | `SoldoutToggleDto { soldout }` | `MenuDto` | 동상 | US-A4.4 |
 | GET | `/admin/tables` | — | `TableDto[]` | 동상 | US-A3.* |
 | POST | `/admin/tables` | `CreateTableDto { number }` | `TableDto` | 동상 | US-A3.1 |
-| POST | `/admin/tables/:id/qr/regenerate` | — | `QrRegenerateResponse { qrToken, imageUrl, pdfUrl }` | 동상 | US-A3.1 |
+| POST | `/admin/tables/:id/qr/regenerate` | — | `QrRegenerateResponse { qrToken, imageUrl(=qr.png), pdfUrl(=qr.pdf) }` | 동상 | US-A3.1 |
+| GET | `/admin/tables/:id/qr.png` | — | image/png | 동상 | US-A3.1 |
 | GET | `/admin/tables/:id/qr.pdf` | — | application/pdf | 동상 | US-A3.1 |
 | POST | `/admin/tables/:id/session/close` | — | `{ closedSessionId, movedOrders }` | 동상 | US-A3.3 |
 | DELETE | `/admin/orders/:id` | — | 204 | 동상 | US-A3.2 |
@@ -76,8 +77,8 @@
 
 | Event | Payload | 발화 시점 |
 |-------|---------|-----------|
-| `session.started` | `{ tableId: string, sessionId: string, startedAt: string }` | 첫 주문 생성 시점 (CR-2 — 세션 자동 생성) |
-| `order.created` | `{ tableId: string, sessionId: string, order: OrderDto }` | 동상 |
+| `session.started` | `{ tableId: string, sessionId: string, startedAt: string }` | **첫 QR 스캔 시점** (CR-2 — 세션 생성). 어드민 대시보드에 '입장(주문 전)' 카드 표시 |
+| `order.created` | `{ tableId: string, sessionId: string, order: OrderDto }` | 주문 확정 시점 |
 | `order.deleted` | `{ tableId: string, sessionId: string, orderId: string }` | 관리자 직권 삭제 |
 | `session.closed` | `{ tableId: string, sessionId: string, closedAt: string }` | 세션 종료 |
 | `menu.soldout.changed` | `{ menuId: string, soldout: boolean }` | 관리자 본인 액션의 echo (대시보드 동기화) |
@@ -102,11 +103,11 @@ class AuthService {
 
 ```typescript
 class TableService {
-  scanQr(qrToken: string): Promise<QrScanResponse>;          // [CR-5] [US-C1.1] — 토큰 검증 + 참가자 토큰 발급
+  scanQr(qrToken: string, existingToken?: string): Promise<QrScanResponse>;  // [CR-5] [US-C1.1] — 토큰 검증 + getOrCreateActiveSession + Cart 보장 + 참가자 바인딩. existingToken 유효 시 재사용(idempotent)
   createTable(storeId: string, dto: CreateTableDto): Promise<TableDto>;  // [US-A3.1]
   regenerateQr(storeId: string, tableId: string): Promise<QrRegenerateResponse>; // 기존 활성 세션 토큰 일괄 무효화
-  closeActiveSession(storeId: string, tableId: string): Promise<{ closedSessionId: string; movedOrders: number }>; // [US-A3.3] [CR-2]
-  getOrCreateActiveSession(tableId: string): Promise<TableSession>;       // 주문 확정 시 OrderService가 호출 [CR-2]
+  closeActiveSession(storeId: string, tableId: string): Promise<{ closedSessionId: string; movedOrders: number }>; // [US-A3.3] [CR-2] — 활성 세션 없으면 404
+  getOrCreateActiveSession(tableId: string): Promise<{ session: TableSession; created: boolean }>; // [CR-2] 첫 스캔 시 scanQr이 호출(세션·Cart 생성). created=true면 session.started 발화
   revokeAllParticipants(sessionId: string): Promise<void>;                // 세션 종료 시 cascade
   generateQrImage(qrToken: string, format: 'png'|'pdf'): Promise<Buffer>;
 }
@@ -120,7 +121,7 @@ class MenuService {
   listForAdmin(storeId: string): Promise<MenuDto[]>;
   create(storeId: string, dto: CreateMenuDto): Promise<MenuDto>;    // 가격 >=1원 검증 [US-A4.1]
   update(storeId: string, id: string, dto: UpdateMenuDto): Promise<MenuDto>; // soldout 플래그 보존 [US-A4.4]
-  delete(storeId: string, id: string): Promise<void>;                // [CR-4] — 과거 스냅샷 보호 (실제 row 삭제)
+  delete(storeId: string, id: string): Promise<void>;                // [CR-4] 과거 스냅샷은 OrderItem이 보존 → 실제 row 삭제. 단 [M5] 활성 카트 참조 시 409 거부
   reorder(storeId: string, ids: string[]): Promise<MenuDto[]>;
   toggleSoldout(storeId: string, id: string, soldout: boolean): Promise<MenuDto>; // [US-A4.4] → SSE
   assertNotSoldout(menuId: string): Promise<void>;                  // CartService·OrderService가 호출
@@ -131,7 +132,7 @@ class MenuService {
 
 ```typescript
 class CartService {
-  getCart(sessionId: string): Promise<CartDto>;                                                 // 빈 카트 자동 생성
+  getCart(sessionId: string): Promise<CartDto>;                                                 // Cart는 세션 생성(스캔) 시 함께 생성 → 조회만(빈 카트면 items=[])
   addItem(sessionId: string, dto: AddCartItemDto): Promise<CartDto>;                             // [CR-6] 버전 +1, [US-A4.4] soldout 거부
   updateItem(sessionId: string, itemId: string, dto: UpdateCartItemDto): Promise<CartDto>;       // 0이면 자동 제거
   removeItem(sessionId: string, itemId: string): Promise<CartDto>;
@@ -145,7 +146,7 @@ class CartService {
 ```typescript
 class OrderService {
   listForSession(sessionId: string): Promise<OrderDto[]>;                                        // 시간 역순 [US-C5.1]
-  createOrder(sessionId: string): Promise<CreateOrderResponse>;                                  // [CR-2 세션 자동 생성] [CR-4 스냅샷] [US-C4.1]
+  createOrder(sessionId: string): Promise<CreateOrderResponse>;                                  // [CR-4 스냅샷] [US-C4.1] — 세션은 스캔 시 이미 존재(생성 책임 없음)
   deleteByAdmin(storeId: string, orderId: string): Promise<void>;                                // [US-A3.2] → SSE session+store
   listHistory(storeId: string, query: HistoryQueryDto): Promise<OrderHistoryDto[]>;              // [US-A3.4]
   moveSessionOrdersToHistory(sessionId: string): Promise<{ movedOrders: number }>;               // TableService.closeSession 호출
@@ -156,7 +157,7 @@ class OrderService {
 
 ```typescript
 class SseService {
-  subscribeSession(sessionId: string, participantToken: string): Observable<MessageEvent<SessionSseEvent>>;
+  subscribeSession(sessionId: string, sessionToken: string): Observable<MessageEvent<SessionSseEvent>>;
   subscribeStore(storeId: string, jwt: string): Observable<MessageEvent<StoreSseEvent>>;
   emitToSession(sessionId: string, event: SessionSseEvent): void;        // 도메인 서비스가 호출
   emitToStore(storeId: string, event: StoreSseEvent): void;
@@ -198,8 +199,8 @@ function useSseChannel<E extends { type: string }>(
 ### 4.2 Customer (예시)
 
 ```typescript
-function useSessionToken(): { sessionId: string | null; participantToken: string | null; clear(): void };
-function useMenuQuery(storeId: string): UseQueryResult<MenuDto[]>;
+function useSessionToken(): { sessionId: string | null; sessionToken: string | null; storeId: string | null; clear(): void };
+function useMenuQuery(): UseQueryResult<MenuDto[]>;  // storeId는 세션 토큰(X-Session-Token)에서 서버가 도출
 function useCartQuery(sessionId: string): UseQueryResult<CartDto>;
 function useCartMutation(sessionId: string): {
   add: UseMutationResult<CartDto, Error, AddCartItemDto>;

@@ -2,7 +2,7 @@
 
 > **v2 (BYOD + QR 모델) 기준** — v1(공용 태블릿) 산출물은 git tag `v1-shared-tablet`에 보존, [aidlc-docs/audit.md ROLLBACK MARKER](../../audit.md) 참조.
 
-본 문서는 Story Generation Plan(`../plans/story-generation-plan.md`)의 5문항 답변에 따른 스토리 모음이다. v2 Requirements Analysis Iteration 2 답변(BYOD/QR/공동 장바구니/테이블 전체 가시성/모바일 PWA/단방향 광고)을 반영해 v1 23 스토리 → v2 27 스토리로 재작성.
+본 문서는 Story Generation Plan(`../plans/story-generation-plan.md`)의 5문항 답변에 따른 스토리 모음이다. v2 Requirements Analysis Iteration 2 답변(BYOD/QR/공동 장바구니/테이블 전체 가시성/모바일 PWA/단방향 광고)을 반영해 v1 23 스토리 → v2 초안 27 → (v2.1 정리: C1.2/A2.4/A2.5 제거 + A4.4 추가) **최종 26 스토리**로 재작성.
 
 - **Format**: Connextra (`As a [persona], I want [goal], so that [benefit]`)
 - **Acceptance Criteria**: Given / When / Then (Gherkin)
@@ -10,7 +10,7 @@
 - **Granularity**: Small — 한 화면/인터랙션 = 1 스토리
 - **Persona Refs**: [P1] 고객 진우 / [P4] 고객 정희(디지털 리터러시 부족 50대) / [P2] 점주 수민 / [P3] 알바 도윤 — 정의는 [personas.md](personas.md)
 
-총 **25개 스토리** (고객 12 + 관리자 13). v2 Iteration 2 — 사용자 요청으로 US-C1.2/A2.4/A2.5 제거 + US-C4.1 흐름 수정 + 신규 US-A4.4(메뉴 품절 토글). 결번 ID(C1.2, A2.4, A2.5)는 트래커빌리티를 위해 재사용하지 않는다.
+총 **26개 스토리** (고객 12 + 관리자 14). v2 Iteration 2 — 사용자 요청으로 US-C1.2/A2.4/A2.5 제거 + US-C4.1 흐름 수정 + 신규 US-A4.4(메뉴 품절 토글). 결번 ID(C1.2, A2.4, A2.5)는 트래커빌리티를 위해 재사용하지 않는다.
 
 ---
 
@@ -19,7 +19,7 @@
 각 스토리 AC에서 `[CR-#]` 로 참조.
 
 - **CR-1 매장ID 스코프 격리** (v1과 동일): 모든 조회·쓰기·집계는 인증된 매장ID(또는 테이블이 속한 매장ID) 범위로 제한. 타 매장 데이터는 어떤 경로로도 노출되지 않는다.
-- **CR-2 테이블 세션 라이프사이클** (v2 보강): 세션 = 첫 주문 시작 ~ 매장 이용 완료 처리. 참가자(`SessionParticipant`)는 QR 스캔으로 자유 합류·이탈. 세션 종료 시 해당 세션의 모든 주문은 OrderHistory로 이동, 공동 장바구니는 비워지고, **모든 참가자 디바이스 토큰이 일괄 무효화**된다.
+- **CR-2 테이블 세션 라이프사이클** (v2.2 변경): 세션 = **첫 QR 스캔 시점** ~ 매장 이용 완료 처리. 첫 스캔자가 활성 세션·공동 장바구니를 생성하고, 이후 스캔자는 **동일 활성 세션에 합류**(테이블당 활성 세션 1개). 참가자(`SessionParticipant`)는 QR 스캔으로 자유 합류·이탈하며 스캔 시점에 활성 세션으로 바인딩된다(sessionId non-null). 세션 종료 시 해당 세션의 모든 주문은 OrderHistory로 이동(단 **주문 0건 빈 세션은 OrderHistory 미기록**), 공동 장바구니는 비워지고, **모든 참가자 세션 토큰이 일괄 무효화**된다. 유휴 빈 세션 자동 만료는 없음(어드민 수동 종료만).
 - **CR-3 현재 세션 가시성** (v2 재정의): 고객 화면(메뉴·장바구니·주문 내역)은 **현재 세션의 모든 참가자 주문을 합산해서** 표시. 참가자 식별 표기는 없음(MVP 단순화). 종료된 과거 세션 주문은 고객 측에 보이지 않는다.
 - **CR-4 주문 스냅샷 보존** (v1과 동일): 주문 확정 시 메뉴명·단가를 스냅샷으로 저장. 이후 메뉴 가격·이름 변경이 과거 주문에 영향 주지 않는다.
 - **CR-5 비밀번호·토큰 안전성** (v2 갱신): 관리자 비밀번호는 bcrypt 해시 저장(평문 금지). **QR 토큰은 UUIDv4 이상 엔트로피로 예측 불가**, 세션 토큰은 만료 시점에 무효화.
@@ -109,9 +109,15 @@ Scenario: 정상 QR 스캔 입장
   Given 테이블에 영구 QR이 부착돼 있고 매장이 영업 중일 때
   When 진우가 본인 폰 카메라로 QR을 인식하고 링크를 열면
   Then [CR-5] 서버가 QR 토큰을 검증해 매장ID·테이블ID를 식별하고
-    And 본인 폰에 새 `SessionParticipant` 토큰을 발급해 localStorage에 임시 저장하며
+    And [CR-2] 테이블에 활성 세션이 없으면 새 세션·공동 장바구니를 생성하고, 있으면 그 활성 세션에 합류시키며
+    And 본인 폰에 새 `SessionParticipant` 토큰을 발급(활성 세션에 바인딩)해 localStorage에 임시 저장하며
     And 메뉴 기본 화면으로 자동 진입한다
     And 상단에 매장명·테이블번호가 노출된다.
+
+Scenario: 같은 폰 재진입(idempotent)
+  Given 진우 폰 localStorage에 유효한 세션 토큰이 이미 있을 때
+  When 같은 QR 링크를 다시 열거나 새로고침하면
+  Then 새 `SessionParticipant`를 중복 발급하지 않고 기존 토큰·세션을 그대로 재사용한다.
 
 Scenario: 무효화된 QR
   Given 관리자가 운영상 사유로 해당 QR을 무효화한 상태
@@ -655,21 +661,28 @@ Scenario: 삭제 취소
 **Acceptance Criteria**
 
 ```gherkin
-Scenario: 세션 종료 처리
-  Given 테이블에 활성 세션·참가자 N명·주문 M건이 있는 상태
+Scenario: 세션 종료 처리 (주문 있음)
+  Given 테이블에 활성 세션·참가자 N명·주문 M건(M≥1)이 있는 상태
   When 도윤이 "매장 이용 완료"를 누르고 확인 팝업에서 "예"를 선택하면
   Then [CR-2] 활성 세션이 종료되고
     And 해당 세션 주문 M건이 OrderHistory로 이동되며
     And 공동 장바구니가 비워지고
     And 모든 참가자 세션 토큰이 일괄 무효화되어 N명 폰에 "이용이 종료되었습니다" 안내가 표시된다.
 
+Scenario: 빈 세션 종료 (스캔만 하고 주문 0건)
+  Given 손님이 QR 스캔으로 활성 세션은 만들었으나 주문 0건인 상태
+  When 도윤이 그 테이블 카드에서 "매장 이용 완료"를 누르고 "예"를 선택하면
+  Then [CR-2] 활성 세션이 종료되고
+    And 주문이 0건이므로 OrderHistory에는 아무것도 기록되지 않으며
+    And 공동 장바구니가 폐기되고 참가자 토큰이 일괄 무효화된다.
+
 Scenario: 신규 손님 입장
   Given 세션 종료 직후
   When 새 손님이 같은 QR을 스캔하면
   Then 신규 세션·신규 참가자 토큰이 발급되고 이전 손님 데이터는 일절 보이지 않는다.
 
-Scenario: 활성 세션 없을 때 보호
-  Given 테이블에 활성 세션이 없는 상태
+Scenario: 종료된 세션 재종료 보호
+  Given 테이블에 활성 세션이 없는 상태(아무도 스캔하지 않았거나 이미 종료됨)
   When 도윤이 "매장 이용 완료"를 누르면
   Then "종료할 활성 세션이 없습니다" 안내가 표시되고 변경 없음.
 ```
@@ -750,9 +763,14 @@ Scenario: 수정 + 과거 주문 보호
     And [CR-4] OrderHistory의 아메리카노 금액은 4,000원으로 보존된다.
 
 Scenario: 삭제
-  Given 메뉴 목록 N개
+  Given 메뉴 목록 N개이고 해당 메뉴가 어떤 활성 장바구니에도 담겨 있지 않을 때
   When 수민이 "삭제" + 확인 "예"
   Then 메뉴가 목록에서 제거되고 [CR-4] 기존 주문 스냅샷은 유지된다.
+
+Scenario: 활성 장바구니에 담긴 메뉴 삭제 차단
+  Given 어떤 메뉴가 한 곳 이상의 활성 세션 공동 장바구니에 담겨 있을 때
+  When 수민이 그 메뉴 "삭제"를 시도하면
+  Then 서버가 409로 거부하고 "장바구니에 담긴 메뉴는 삭제할 수 없습니다. 품절로 빼거나 비운 뒤 삭제하세요" 안내가 표시되며 메뉴는 유지된다.
 
 Scenario: 삭제 취소
   Given 확인 팝업 오픈

@@ -49,8 +49,8 @@ flowchart LR
 | **Cart**     |      |   ●   |   ●   |   ●  |  —   |       |  ●  |     |       |   ●    |
 | **Order**    |      |   ●   |   ●   |   ●  |   ●  |   —   |  ●  |     |       |   ●    |
 | **Sse**      |      |       |       |      |      |       |  —  |     |       |   ●    |
-| **Ads**      |      |   ●   |       |      |      |       |     |  —  |       |   ●    |
-| **Admin**    |      |   ●   |   ●   |   ●  |   ●  |   ●   |  ●  |  ●  |   —   |   ●    |
+| **Ads**      |      |       |       |      |      |       |     |  —  |       |   ●    |
+| **Admin**    |      |   ●   |   ●   |   ●  |   ●  |   ●   |  ●  |     |   —   |   ●    |
 | **Common**   |      |       |       |      |      |       |     |     |       |   —    |
 
 **관찰**:
@@ -58,7 +58,8 @@ flowchart LR
 - `CommonModule`은 모든 모듈이 의존(가드·인터셉터·EventEmitter2 wiring 제공).
 - `SseModule`은 `EventEmitter2`만 의존하고 도메인을 모름 — 역방향 의존(decoupled). 도메인 모듈이 SseService를 직접 호출하거나 EventEmitter로 emit.
 - `OrderModule`이 가장 다인 협력자 (Table·Cart·Menu·Sse) — `createOrder()` 유스케이스 복잡도 반영.
-- `AdminModule`은 read-only orchestrator라 거의 모든 도메인 의존하지만 쓰기는 안 함.
+- `AdminModule`은 read-only orchestrator라 도메인 다수(Store·Table·Menu·Cart·Order·Sse)를 읽지만 쓰기는 안 함. **광고(Ads)는 system-wide(CR-7)라 대시보드와 무관 → 의존 없음.**
+- `AdsModule`은 system-wide 시드 데이터만 read하므로 Store에 의존하지 않음(CR-7).
 - **순환 의존 없음**: Table → Order? Order → Table은 OK. Table → Cart, Order → Cart도 OK. Cart는 Menu만 (단방향).
 
 ---
@@ -108,32 +109,44 @@ sequenceDiagram
     participant CW as Customer Web<br/>(React PWA)
     participant API as Backend REST<br/>(TableController)
     participant TS as TableService
+    participant SSE as SseService<br/>(store 채널)
     participant DB as SQLite
 
     User->>CW: QR 스캔 (카메라/QR 앱)
     CW->>CW: /qr/:token 라우트 진입
-    CW->>API: POST /qr/scan/{token}
-    API->>TS: scanQr(token)
+    CW->>API: POST /qr/scan/{token}<br/>(X-Session-Token? — 재진입 시)
+    API->>TS: scanQr(token, existingToken?)
     TS->>DB: SELECT Table WHERE qrToken
     DB-->>TS: Table | null
     alt 토큰 무효 / 매장 영업종료
         TS-->>API: 403
         API-->>CW: 403 + reason
         CW-->>User: "잠시 후 다시 시도하세요"
-    else 정상
-        TS->>DB: INSERT SessionParticipant<br/>(tableId, sessionId=null, deviceToken)
-        DB-->>TS: participantId
-        TS-->>API: { sessionToken, sessionId=null, storeName, tableNumber }
+    else 정상 (신규 진입)
+        TS->>DB: BEGIN
+        TS->>DB: SELECT active TableSession FOR UPDATE
+        opt 활성 세션 없음 (첫 스캔)
+            TS->>DB: INSERT TableSession(ACTIVE) + Cart(version=0)
+        end
+        TS->>DB: INSERT SessionParticipant<br/>(sessionId, token)
+        TS->>DB: COMMIT
+        opt 세션 신규 생성됨
+            TS->>SSE: emit session.started (store 채널)<br/>→ 어드민 '입장(주문 전)' 카드
+        end
+        TS-->>API: { sessionToken, sessionId, storeId, storeName, tableNumber }
         API-->>CW: 200 OK
         CW->>CW: localStorage.set(sessionToken, …)
         CW->>CW: navigate('/menu')
-        CW->>API: GET /menus?storeId=…
+        CW->>API: GET /menus (X-Session-Token)
         API-->>CW: MenuDto[]
         CW-->>User: 메뉴 화면 + 매장명·테이블번호 헤더
+    else 같은 폰 재진입 (유효 세션 토큰)
+        TS-->>API: 기존 세션·참가자 재사용 (idempotent)
+        API-->>CW: 200 OK (동일 sessionId)
     end
 ```
 
-**참고**: 세션은 아직 안 생긴 상태(첫 주문 시점에 생성). SessionParticipant.sessionId가 null이면 첫 주문 시 OrderService가 bind.
+**참고**: 세션·공동 장바구니는 **첫 스캔 시점에 생성**되고 이후 스캔자는 동일 활성 세션에 합류한다(테이블당 활성 1개). SessionParticipant.sessionId는 항상 non-null. 같은 폰 재진입은 중복 발급 없이 idempotent.
 
 ---
 
@@ -194,7 +207,6 @@ sequenceDiagram
     participant AW as Admin Web
     participant API as OrderController
     participant OS as OrderService
-    participant TS as TableService
     participant CS as CartService
     participant MS as MenuService
     participant SSE as SseService
@@ -205,10 +217,8 @@ sequenceDiagram
     A->>CWA: "주문하기" 확인
     CWA->>API: POST /sessions/{sid}/orders
     API->>OS: createOrder(sid)
+    Note over OS: 세션은 스캔 시 이미 존재 — 생성 단계 없음
     OS->>DB: BEGIN
-    OS->>TS: getOrCreateActiveSession(tableId)
-    TS->>DB: SELECT/INSERT TableSession
-    Note over TS: sessionCreated 플래그 셋 (첫 주문이면 true)
     OS->>CS: snapshotForOrder(sid)
     CS-->>OS: CartItemSnapshot[]
     OS->>MS: assertNotSoldout(menuId) × N
@@ -217,9 +227,6 @@ sequenceDiagram
     OS->>DB: COMMIT
     OS->>SSE: emit('cart.cleared', { sid })
     OS->>SSE: emit('order.created', { sid, order })
-    alt sessionCreated == true
-        OS->>SSE: emit('session.started', { tableId, sid })
-    end
 
     par 고객 채널 브로드캐스트
         SSE-->>CWA: cart.cleared + order.created
@@ -227,7 +234,6 @@ sequenceDiagram
         CWA->>CWA: navigate('/orders') (v2.1)
         CWB->>CWB: 장바구니 비움 + 주문내역 갱신
     and 매장 채널 브로드캐스트
-        SSE-->>AW: session.started (if any)
         SSE-->>AW: order.created
         AW->>AW: 테이블 카드 갱신 + 강조 애니메이션
     end

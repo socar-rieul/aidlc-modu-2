@@ -12,7 +12,7 @@
 | 분류 | 정의 | 예시 |
 |------|------|------|
 | **Domain Service** | 단일 도메인 내부 비즈니스 룰 처리, DB·EventEmitter 직접 호출 | MenuService, CartService, OrderService 일부, TableService 일부, AdsService |
-| **Application Service** | 여러 도메인 service를 호출해 use-case를 조립하는 orchestration layer | OrderService.createOrder(), TableService.closeActiveSession(), AdminDashboardService.getDashboard() |
+| **Application Service** | 여러 도메인 service를 호출해 use-case를 조립하는 orchestration layer | TableService.scanQr()(세션·Cart 생성+참가자 바인딩+SSE), OrderService.createOrder(), TableService.closeActiveSession(), AdminDashboardService.getDashboard() |
 | **Cross-cutting** | DI 가드·인터셉터·EventEmitter wiring | CommonModule 가드 + SseService 이벤트 라우터 |
 
 본 프로젝트는 NestJS 단일 service 클래스가 두 역할을 겸함 (오케스트레이션 분리는 PoC 단순화). 단 함수 단위로 분류해 의도를 명시한다.
@@ -24,18 +24,22 @@
 ### 2.1 고객 QR 스캔 입장 (US-C1.1)
 
 ```text
-HTTP POST /qr/scan/:token
-└─ TableController.scanQr(token)
-   └─ TableService.scanQr(token)             [Application]
-      ├─ Table repository.findOneByQrToken(token)     # 토큰 검증, 미존재 → 404
+HTTP POST /qr/scan/:token   (header X-Session-Token? — 재진입 시)
+└─ TableController.scanQr(token, existingToken?)
+   └─ TableService.scanQr(token, existingToken?)   [Application]
+      ├─ existingToken 유효 → 기존 SessionParticipant·세션 그대로 반환 (idempotent, 트랜잭션 없음)
+      ├─ Table repository.findOneByQrToken(token)     # 토큰 검증/무효화 → 403 (존재 여부 미노출)
       ├─ Store repository.assertActive(table.storeId) # 영업 종료 → 403
-      ├─ SessionParticipant repository.create({ tableId, sessionId(=table의 active session, 없으면 null) })
-      └─ return { sessionToken, sessionId, storeName, tableNumber }
+      ├─ DB transaction
+      │  ├─ getOrCreateActiveSession(tableId)         # CR-2: 활성 세션 없으면 TableSession + Cart(version=0) 생성, created 플래그
+      │  └─ SessionParticipant.create({ sessionId, token })   # sessionId non-null 바인딩
+      ├─ created == true → SseService.emitToStore(storeId, { type: 'session.started', tableId, sessionId, startedAt })
+      └─ return { sessionToken, sessionId, storeId, storeName, tableNumber }
 ```
 
-- **세션 자동 생성 안 함** — 세션은 첫 주문 시점에 생성된다 (CR-2). 스캔 직후엔 sessionId = null 가능. 첫 주문 시 OrderService가 TableService.getOrCreateActiveSession() 호출.
-- **SessionParticipant**는 스캔 시점 즉시 발급 (트랜잭션 1회). sessionId가 null이면 임시 placeholder, 첫 주문 시 실제 session에 bind.
-- **SSE 발화 없음** — 참가자 가시화는 v2.1에서 제거 (US-C1.2 결번).
+- **세션은 첫 스캔 시 생성** (CR-2 — v2.2). 첫 스캔자가 TableSession + Cart를 만들고, 이후 스캔자는 동일 활성 세션에 합류. 테이블당 활성 세션 1개(`status=ACTIVE` unique + row lock으로 동시 스캔 레이스 직렬화).
+- **세션 채널 SSE 발화 없음** (참가자 가시화는 v2.1 제거 — US-C1.2 결번). 단 **매장 채널 `session.started`는 세션 신규 생성 시 1회 발화** → 어드민이 '입장(주문 전)' 테이블 카드로 인지·종료 가능.
+- **idempotent**: 같은 폰 재진입(유효 세션 토큰 보유)은 SessionParticipant를 중복 발급하지 않는다.
 
 ### 2.2 공동 장바구니 추가 (US-C3.1)
 
@@ -65,10 +69,9 @@ HTTP POST /sessions/:sessionId/orders
    └─ OrderService.createOrder(sessionId)   [Application — 4 도메인 협력]
       ├─ QrTokenGuard → SessionScopeGuard 통과
       ├─ DB transaction
-      │  ├─ TableService.getOrCreateActiveSession(tableId)  # CR-2 첫 주문 시 세션 생성
-      │  │   └─ 세션이 새로 생성된 경우 sessionCreated=true 플래그 셋
+      │  ├─ (세션은 스캔 시 이미 존재 — 생성 단계 없음)
       │  ├─ CartService.snapshotForOrder(sessionId)         # 현재 items + 단가 read (메뉴 price 스냅샷)
-      │  ├─ MenuService.assertNotSoldout(menuId) × N        # 카트 내 모든 메뉴 재검증
+      │  ├─ MenuService.assertNotSoldout(menuId) × N        # 카트 내 모든 메뉴 재검증 (품절 포함 시 409)
       │  ├─ Order + OrderItem[] insert (CR-4 스냅샷 — menuName, unitPrice 복사)
       │  ├─ CartService.clear(sessionId) (Cart.version += 1)
       │  └─ commit
@@ -76,10 +79,7 @@ HTTP POST /sessions/:sessionId/orders
       │    { type: 'cart.cleared', version },
       │    { type: 'order.created', order }
       │  ])  [CR-3, NFR-1]
-      ├─ SseService.emitToStore(storeId, [
-      │    sessionCreated ? { type: 'session.started', tableId, sessionId, startedAt } : null,
-      │    { type: 'order.created', tableId, sessionId, order }
-      │  ])
+      ├─ SseService.emitToStore(storeId, { type: 'order.created', tableId, sessionId, order })
       └─ return { order, cart: clearedCart }
 ```
 
@@ -90,9 +90,11 @@ HTTP POST /admin/tables/:id/session/close
 └─ AdminTableController.closeSession
    └─ TableService.closeActiveSession(storeId, tableId)   [Application — 3 도메인 협력]
       ├─ JwtAuthGuard + StoreScopeGuard 통과
+      ├─ 활성 세션 없음 → 404 "종료할 활성 세션이 없습니다" (변경 없음)
       ├─ DB transaction
       │  ├─ TableSession.status = 'CLOSED', endedAt = now
-      │  ├─ OrderService.moveSessionOrdersToHistory(sessionId) → OrderHistory insert + Order soft-delete
+      │  ├─ 주문 ≥1건 → OrderService.moveSessionOrdersToHistory(sessionId) → OrderHistory insert + Order soft-delete
+      │  │   주문 0건(빈 세션) → OrderHistory 미기록 (Q2), movedOrders = 0
       │  ├─ CartService.clear(sessionId)
       │  └─ TableService.revokeAllParticipants(sessionId)  # SessionParticipant.revokedAt = now
       ├─ SseService.emitToSession(sessionId, { type: 'session.closed', reason: 'admin-closed' })
@@ -127,8 +129,8 @@ HTTP PATCH /admin/menus/:id/soldout   { soldout: true }
 |------|-----------|------|
 | `JwtAuthGuard` | `/admin/**` | JWT 검증 + `request.user = { storeId, userId }` 주입. 만료 시 401. (NFR-2 30일) |
 | `RateLimitGuard` | POST `/admin/auth/login` | IP·매장ID 조합 5회 실패 후 일시 차단. (US-A1.3, NFR-3) |
-| `QrTokenGuard` | `/sessions/**`, `/sse/sessions/**` | 헤더 `X-Session-Token` 검증 → `SessionParticipant` 조회 → revoked 거부 → `request.session = { sessionId, tableId, storeId }` 주입. |
-| `StoreScopeGuard` | `/admin/**`, `/menus`, `/ads`, `/sse/stores/**` | `request.user.storeId` 또는 query/path의 storeId가 일치하는지 강제. **타 매장 데이터 접근 차단 (CR-1).** |
+| `QrTokenGuard` | `/sessions/**`, `/sse/sessions/**`, `/menus` | 헤더 `X-Session-Token` 검증 → `SessionParticipant` 조회 → revoked 거부 → `request.session = { sessionId, tableId, storeId }` 주입. `/menus`도 이 가드로 storeId를 세션에서 도출(쿼리 파라미터 제거 — CR-1). |
+| `StoreScopeGuard` | `/admin/**`, `/sse/stores/**` | `request.user.storeId`(JWT)가 path/대상 storeId와 일치하는지 강제. **타 매장 데이터 접근 차단 (CR-1).** `/ads`는 system-wide(CR-7)라 미적용(public). |
 | `SessionScopeGuard` | `/sessions/:sessionId/**` | path `:sessionId` ↔ `request.session.sessionId` 일치 강제. **타 세션 접근 차단 (CR-1·CR-2).** |
 
 **Guard 적용 순서**: 인증(`JwtAuthGuard` or `QrTokenGuard`) → 스코프(`StoreScopeGuard` / `SessionScopeGuard`) → RateLimit(엔드포인트별). NestJS `@UseGuards()` 데코레이터 + 글로벌 가드(`APP_GUARD` provider) 조합으로 강제.
@@ -144,7 +146,9 @@ HTTP PATCH /admin/menus/:id/soldout   { soldout: true }
 - `SseModule`이 채널 레지스트리(`Map<channelKey, Subject>`)를 보유. channelKey = `session:{sessionId}` or `store:{storeId}`.
 - 구독 시 `Subject.subscribe` → unsubscribe는 클라이언트 연결 종료 hook(NestJS `Subscription.add(() => close)`).
 - **Keep-alive**: 15초마다 `: keep-alive\n\n` 코멘트 라인 발신 (브라우저·프록시 idle 종료 방지).
-- **재연결**: 클라이언트는 `EventSource` 기본 재연결(3초 지수 백오프). 서버는 stateless이므로 추가 처리 없음. (단절 중 누락 이벤트는 클라이언트가 재연결 직후 `GET /sessions/:sessionId/cart` + `/orders` 호출로 reconcile — `useSseChannel` 훅에서 `onreconnect` 콜백으로 처리.)
+- **재연결 & reconcile (이벤트 리플레이 없음)**: SSE 채널은 **라이브 푸시 전용**이다. 서버는 단절 중 발생한 이벤트를 버퍼링·재전송하지 않으며 `Last-Event-ID` 리플레이도 두지 않는다(서버 stateless). 대신 클라이언트가 `EventSource` 기본 재연결(3초 백오프) 직후 **전체 스냅샷을 통째로 재조회**한다 — `GET /sessions/:sessionId/cart` + `GET /sessions/:sessionId/orders`로 받은 서버 권위 상태로 React Query 캐시를 덮어쓴다(`useSseChannel` 훅 `onreconnect` 콜백).
+  - 근거: 공동 장바구니는 **서버 권한**(NFR-5) + `Cart.version` 단조 증가(CR-6)라 풀-페치가 항상 정답. 누락 이벤트를 일일이 재생하는 것보다 단순·정합적(US-C3.4 "SSE 끊김 후 자동 복구").
+  - 단절 중 보낸 본인 mutation: POST가 commit 전 끊겼으면 서버 미반영(재시도 필요), commit 후 응답만 유실됐으면 서버 반영됨 → 둘 다 재연결 풀-페치에서 서버 상태로 자동 수렴.
 
 ### 3.4 예외·로그 인터셉터
 

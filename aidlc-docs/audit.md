@@ -243,3 +243,27 @@
 **Context**: INCEPTION - User Stories Part 2 Step 19 직전. Step 20 Completion Message 제시 예정.
 
 ---
+
+## Application Design — 리뷰 + 정합성 결정 + v2.2 개정 (7종 문서 동기화)
+**Timestamp**: 2026-06-19T14:30:00Z
+**User Input**: "@aidlc-docs/inception/application-design/ 내부 문서들 전체 리뷰해줘."
+**AI Response**: 5종 산출물 + 상위(requirements v2·stories v2) 교차 검증. Critical 1(C1: 세션 생성 시점=첫 주문 ↔ Cart/SSE의 sessionId 키잉 모순 → 공동 장바구니 실시간 동기화 원천 불가) + Major 4(M2 storeId 흐름 단절, M3 /ads 가드 모순, M4 토큰 명칭 4종, M5 메뉴 삭제 FK) + Minor 10 보고.
+**User Input**: "야 C1은 A로 가는데, 근데 이러면 어드민에서 이 세션 만료시킬 수 있지? 다른거 또 의사결정해야하는거 있냐"
+**AI Response**: C1=A(세션을 첫 QR 스캔 시 생성) 확정. A 파생 정책 분기점 4건을 AskUserQuestion으로 제시.
+**User Input (4문항 답변, raw)**: "빈 세션 가시성=스캔 시 표시 / 빈 세션 history=기록 안 함 / 자동 만료=수동 종료만 / CR-2 동기화=상위까지 동기화" (전부 Recommended 선택).
+**User Input**: "1번." (= 의사결정 종합 후 '지금 바로 7종 전체 수정 진행' 선택). 추가 정책 M5 질문 → **답변(raw)**: "담겼으면 삭제 차단 (Recommended)".
+**User Input (작업 중 질문, raw)**: "야 만약에 장바구니 담다가 끊겼어. 그러면 다음에 sse 연결하면 서버에 있는 최신 데이터를 통으로 떠가냐?"
+**AI Response (답변)**: 그렇다 — SSE는 라이브 푸시 전용(이벤트 리플레이/Last-Event-ID 없음), 재연결 직후 GET /cart + /orders 풀-페치로 서버 권위 상태를 통째로 덮어씀(Cart.version 단조 증가·서버 권한이라 풀페치가 정답). services.md §3.3에 명시 보강.
+**확정 의사결정**: C1(세션=첫 스캔 생성), Q1(빈 세션 스캔 시 대시보드 표시 + session.started 스캔 발화), Q2(빈 세션 OrderHistory 미기록), Q3(자동 만료 없음·수동 종료만), Q4(상위 문서 동기화), M5(활성 카트 참조 메뉴 삭제 409 차단).
+**수정 문서 7종**:
+  - requirements.md: §3.3 데이터 모델(TableSession 첫 스캔~, SessionParticipant.sessionId non-null·token) + §7 비즈니스 룰(세션 첫 스캔 시작·빈 세션 미기록·자동만료 없음).
+  - stories.md: CR-2 재정의, US-C1.1(스캔 시 세션 생성/합류 + idempotent 시나리오), US-A3.3(빈 세션 종료 + 종료된 세션 재종료 보호), US-A4.2(활성 카트 메뉴 삭제 차단), 스토리 수 26 정정.
+  - components.md: AuthModule LoginAttempt 잔존 제거, CommonModule RateLimitGuard 추가, TableSession/SessionParticipant 엔티티(첫 스캔·non-null·token), AdminModule 광고 read 제거, ConfirmOrderPage 정리, shared DTO(MenuSortDto·OrderHistoryDto) 보강.
+  - component-methods.md: QrScanResponse storeId 추가·non-null, /menus QrTokenGuard(쿼리 제거), DashboardDto 광고 제거, qr.png 엔드포인트 추가, DELETE 메뉴 409, session.started 발화 시점, scanQr/getOrCreateActiveSession/createOrder 시그니처, getCart·useMenuQuery·subscribeSession 정정.
+  - services.md: §2.1 scanQr(세션·Cart 생성+session.started+idempotent, 403 통일), §2.3 createOrder(세션 생성 단계 제거), §2.4 빈 세션 종료 분기·활성 세션 없으면 404, §3.1 가드(/menus QrTokenGuard·/ads public), §3.3 재연결 reconcile 명시.
+  - component-dependency.md: 의존 매트릭스 Admin→Ads·Ads→Store 제거, 시퀀스 4.1(세션·Cart 생성+session.started+idempotent 분기), 시퀀스 4.3(세션 생성 단계·session.started 제거·TS 참가자 제거).
+  - application-design.md(통합): §2.1 세션 모델 결정 표 신규, §4 CR-2, §5 시퀀스 요약, 스토리 수 26.
+  - aidlc-state.md: 스토리 수 26, Application Design v2.2 개정 표시, Current Stage 갱신.
+**Context**: INCEPTION - Application Design v2.2 리뷰 개정 완료. Approval Gate 대기.
+
+---

@@ -32,12 +32,25 @@
 
 | ID | 결정 | 근거 |
 |----|------|------|
-| Q1 | **NestJS 도메인별 모듈** (9개 도메인 + 1 Common) | 정석 패턴, 25 스토리 규모, Functional Design per-unit 매핑 쉬움 |
+| Q1 | **NestJS 도메인별 모듈** (9개 도메인 + 1 Common) | 정석 패턴, 26 스토리 규모, Functional Design per-unit 매핑 쉬움 |
 | Q2 | **REST + 공유 DTO** (`packages/shared`) | Swagger UI 디버깅 + TypeScript 타입 안전성 |
 | Q3 | **TypeORM** | NestJS 공식 통합, 데코레이터 기반, 마이그레이션 도구 내장 |
 | Q4 | **class-validator + class-transformer** | Q3에 매칭, DTO 데코레이션 통일 |
 | Q5 | **TanStack Query + useState** | SSE → setQueryData 캐시 갱신 자연스러움 |
 | Q6 | **pnpm workspaces** | 의존 격리·디스크 효율 ↑, 4 패키지 관리 단순화 |
+
+### 2.1 세션 모델 결정 (v2.2 — 리뷰 후 확정)
+
+Application Design 리뷰에서 "세션 생성 시점 ↔ Cart/SSE 키잉" 모순이 발견되어 다음을 확정했다.
+
+| ID | 결정 | 근거 |
+|----|------|------|
+| **C1** | 세션·공동 장바구니를 **첫 QR 스캔 시점**에 생성 (기존 "첫 주문 시점" 폐기) | sessionId=null 상태에선 Cart·SSE 채널이 성립 불가 → 공동 장바구니 실시간 동기화(핵심 기능)가 주문 전 동작하려면 스캔 시 세션 필요 |
+| C1-a | 테이블당 활성 세션 1개(`status=ACTIVE` unique + row lock), 이후 스캔자는 합류, 재진입 idempotent | 동시 스캔 레이스 방지 |
+| C1-b | 빈 세션(주문 0건)도 어드민이 **수동 종료** 가능, 종료 시 OrderHistory **미기록** | 스캔만 하고 이탈한 세션 정리. 자동 만료(timeout)는 두지 않음 |
+| C1-c | `session.started` SSE를 **스캔 시 발화** → 어드민 대시보드 '입장(주문 전)' 카드 | 빈 세션 가시화·관리 |
+
+부수 정정: 광고(`/ads`)는 system-wide(CR-7)라 public·Store 무의존 / 고객 `/menus`는 `QrTokenGuard`로 storeId 도출 / 활성 카트 참조 메뉴는 삭제 차단(409) / 세션 토큰 명칭 `sessionToken`으로 통일.
 
 ---
 
@@ -65,7 +78,7 @@
 핵심 룰:
 
 - **CR-1 매장ID 스코프**: 모든 read/write에 storeId 가드 강제
-- **CR-2 세션 라이프사이클**: 첫 주문 시점 생성 ~ 매장 이용 완료 처리. 종료 시 OrderHistory 이동 + 모든 참가자 토큰 무효화
+- **CR-2 세션 라이프사이클**: **첫 QR 스캔 시점 생성**(테이블당 활성 1개, Cart 동시 생성) ~ 매장 이용 완료 처리. 종료 시 OrderHistory 이동(빈 세션은 미기록) + 모든 참가자 토큰 무효화
 - **CR-3 현재 세션 가시성**: 종료 세션은 고객 측 미노출
 - **CR-4 주문 스냅샷**: OrderItem이 menuName·unitPrice 복사 보존 → 이후 Menu 변경 무관
 - **CR-5 토큰·비밀번호**: QR=UUIDv4, JWT 30일, bcrypt
@@ -83,7 +96,7 @@
 
 핵심 시퀀스 3개:
 
-1. **QR 스캔 입장** — Customer Web → TableService.scanQr → SessionParticipant 발급 → 메뉴 화면
+1. **QR 스캔 입장** — Customer Web → TableService.scanQr → (첫 스캔이면) 세션·Cart 생성 + session.started SSE → SessionParticipant 바인딩 → 메뉴 화면
 2. **공동 장바구니 추가** — Cart 행 lock → version+1 → COMMIT → 세션 채널 SSE 브로드캐스트 (≤2초)
 3. **주문 확정** — Order 트랜잭션 (Cart→Order 스냅샷) → 세션 채널 + 매장 채널 SSE 동시 발화 → 관리자 대시보드 즉시 갱신
 

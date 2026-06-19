@@ -1,7 +1,7 @@
 # Application Design Plan — 테이블오더 서비스 (v2)
 
 > **Stage**: INCEPTION · Application Design · Step 2~9 산출물 (Planning)
-> **Prior context**: [`requirements.md` v2](../requirements/requirements.md) · [`stories.md` v2 (25 스토리)](../user-stories/stories.md) · [`personas.md` v2](../user-stories/personas.md) · [`execution-plan.md`](execution-plan.md)
+> **Prior context**: [`requirements.md` v2](../requirements/requirements.md) · [`stories.md` v2 (26 스토리)](../user-stories/stories.md) · [`personas.md` v2](../user-stories/personas.md) · [`execution-plan.md`](execution-plan.md)
 > **확정 기술 스택**: TypeScript · NestJS · React · SQLite · JWT(30일) · bcrypt · SSE · UUIDv4(QR) · 로컬 한정
 
 본 문서는 AI-DLC inception/application-design.md Step 2(plan 생성) ~ Step 9(ambiguity 해소)의 산출물이다. Step 10(실제 design 4종 + 통합 문서 생성)은 본 plan 승인 후 실행한다.
@@ -21,7 +21,7 @@
 - **C. 하이브리드** — 도메인별 모듈 + 모듈 내부 layer 분리 (A와 동일하지만 cross-domain shared layer는 별도 `common/` 폴더로).
 - **D. 모놀리식 단일 src/** — 워크샵 단순화. 모듈 분리 없이 한 폴더에 controller/service 평면 배치.
 
-**근거 후보**: A 권장 — NestJS 정석 패턴, 25 스토리 규모에 충분, 도메인 경계 명확화로 Functional Design per-unit과 매핑 쉬움. (B/D는 작은 PoC엔 빠르지만 도메인 의존 시각화가 어려워짐.)
+**근거 후보**: A 권장 — NestJS 정석 패턴, 26 스토리 규모에 충분, 도메인 경계 명확화로 Functional Design per-unit과 매핑 쉬움. (B/D는 작은 PoC엔 빠르지만 도메인 의존 시각화가 어려워짐.)
 
 **[Answer]: A. 도메인별 모듈** — AuthModule, StoreModule, MenuModule, CartModule, OrderModule, SseModule, QrModule, AdminModule. 각 모듈 내부 controller/service/repository/dto 분리.
 
@@ -78,7 +78,7 @@
 - **A. TanStack Query (React Query)** + 로컬 `useState` — 서버 상태는 React Query 캐시·SSE 이벤트는 `queryClient.setQueryData`로 통합. UI 로컬 상태는 React useState.
 - **B. Redux Toolkit** + RTK Query — Redux 중심. 학습 곡선 있음.
 - **C. Zustand** — 가벼운 글로벌 store. SSE 이벤트를 store에 직접 dispatch.
-- **D. React Context + useReducer** — 외부 라이브러리 없음. 25 스토리 규모엔 빠듯.
+- **D. React Context + useReducer** — 외부 라이브러리 없음. 26 스토리 규모엔 빠듯.
 
 **근거 후보**: **A 권장** — SSE 실시간 갱신 + 서버 상태(메뉴·테이블 그리드·주문 내역)가 핵심이라 React Query 모델이 자연스러움. 로컬 UI 상태는 그냥 useState로 충분.
 

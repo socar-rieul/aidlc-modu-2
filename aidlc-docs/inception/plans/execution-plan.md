@@ -1,7 +1,7 @@
 # Execution Plan — 테이블오더 서비스 (v2 BYOD/QR)
 
 > **Stage**: INCEPTION · Workflow Planning · Step 7 산출물
-> **Prior context**: [`requirements.md` v2](../requirements/requirements.md) + [`stories.md` v2 (25 스토리)](../user-stories/stories.md) + [`personas.md` v2 (4 페르소나)](../user-stories/personas.md)
+> **Prior context**: [`requirements.md` v2](../requirements/requirements.md) + [`stories.md` v2 (26 스토리)](../user-stories/stories.md) + [`personas.md` v2 (4 페르소나)](../user-stories/personas.md)
 > **Project Type**: Greenfield · Workshop PoC · Local-only
 
 ---
@@ -115,7 +115,7 @@ flowchart TD
 - [x] **Workspace Detection** — COMPLETED (greenfield 판정)
 - [x] **Reverse Engineering** — SKIPPED (greenfield)
 - [x] **Requirements Analysis** — COMPLETED (v2 Iteration 2, BYOD/QR/공동 장바구니/광고)
-- [x] **User Stories** — COMPLETED (v2.1, 25 스토리, 4 페르소나)
+- [x] **User Stories** — COMPLETED (v2.1, 26 스토리, 4 페르소나)
 - [x] **Workflow Planning** — IN PROGRESS (본 문서)
 - [ ] **Application Design** — **EXECUTE**
   - **Rationale**: 신규 시스템 전체 — NestJS 모듈(Auth/Menu/Cart/Order/SSE/Admin) + React 컨테이너 2종 + 12개 엔티티 + 컴포넌트 간 의존(SSE 채널·세션 라이프사이클·QR 토큰 무효화) 명확화 필요.

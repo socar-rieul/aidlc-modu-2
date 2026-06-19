@@ -30,16 +30,16 @@ aidlc-modu/
 
 | Module | 책임 | 주요 엔티티 | 노출 인터페이스 | 커버 스토리 |
 |--------|------|-------------|-----------------|-------------|
-| **AuthModule** | 관리자 로그인·JWT 발급(30일)·bcrypt 검증·로그인 시도 카운터 | StoreUser, LoginAttempt | REST `/admin/auth/*`, `JwtAuthGuard` | US-A1.1, A1.2, A1.3 |
+| **AuthModule** | 관리자 로그인·JWT 발급(30일)·bcrypt 검증·로그인 시도 카운터 | StoreUser (`failedAttempts`·`lockUntil` 필드 포함) | REST `/admin/auth/*`, `JwtAuthGuard` | US-A1.1, A1.2, A1.3 |
 | **StoreModule** | 매장(Store) 마스터·매장ID 스코프 가드 | Store | `StoreScopeGuard` (CR-1 강제), 내부 read API | (cross-cutting) |
-| **TableModule** | 테이블 마스터·QR 토큰 발급·세션 라이프사이클·SessionParticipant 토큰 발급·일괄 무효화 | Table, TableSession, SessionParticipant | REST `/qr/scan/:token`, `/admin/tables/*`, `QrTokenGuard`, `SessionScopeGuard` (CR-2) | US-C1.1, A3.1, A3.3 |
+| **TableModule** | 테이블 마스터·QR 토큰 발급·세션 라이프사이클(**첫 스캔 시 세션·Cart 생성**, 테이블당 활성 1개)·SessionParticipant 토큰 발급·일괄 무효화 | Table, TableSession, SessionParticipant | REST `/qr/scan/:token`, `/admin/tables/*`, `QrTokenGuard`, `SessionScopeGuard` (CR-2) | US-C1.1, A3.1, A3.3 |
 | **MenuModule** | 메뉴 CRUD + 카테고리 + 정렬 + **품절 토글(soldout)** + 가격 검증 | Menu, MenuCategory | REST `/menus`, `/admin/menus/*` | US-C2.1, A4.1~A4.4 |
 | **CartModule** | 공동 장바구니 조회·추가·수정·삭제·전체 비우기 + 서버 권한 버전 부여(CR-6 last-write-wins) + 품절 보호 | Cart, CartItem | REST `/sessions/:sessionId/cart/*` | US-C3.1, C3.2, C3.3, C3.4 |
 | **OrderModule** | 주문 확정(장바구니→주문)·주문 스냅샷(CR-4)·테이블 전체 내역·관리자 직권 삭제·OrderHistory 이동 | Order, OrderItem, OrderHistory | REST `/sessions/:sessionId/orders/*`, `/admin/orders/*` | US-C4.1, C4.2, C5.1, A3.2, A3.4 |
 | **SseModule** | 두 SSE 채널 관리(세션 채널 / 매장 채널) + EventEmitter2 라우팅 + keep-alive | (in-memory) | REST `/sse/sessions/:sessionId`, `/sse/stores/:storeId` | US-A2.1, C3.1, C4.1, A4.4 (cross-cutting) |
 | **AdsModule** | Advertisement 시드 + 노출 endpoint (CR-7 단방향) | Advertisement | REST `/ads?slot=` | US-C6.1 |
-| **AdminModule** | 대시보드 그리드 집계(read-only orchestration across Table·Order·Cart) + 광고 슬롯 read | (집계만, 자체 엔티티 X) | REST `/admin/dashboard` | US-A2.1, A2.2, A2.3 |
-| **CommonModule** | 전역 가드(JwtAuthGuard, StoreScopeGuard, QrTokenGuard, SessionScopeGuard), 인터셉터, 예외 필터, 로깅, EventEmitter2 wiring | — | DI 토큰 | (cross-cutting) |
+| **AdminModule** | 대시보드 그리드 집계(read-only orchestration across Table·Order·Cart) | (집계만, 자체 엔티티 X) | REST `/admin/dashboard` | US-A2.1, A2.2, A2.3 |
+| **CommonModule** | 전역 가드(JwtAuthGuard, StoreScopeGuard, QrTokenGuard, SessionScopeGuard, RateLimitGuard), 인터셉터, 예외 필터, 로깅, EventEmitter2 wiring | — | DI 토큰 | (cross-cutting) |
 
 ### 1.1 데이터 모델 매핑 (requirements.md v2 §3.3 ↔ TypeORM 엔티티)
 
@@ -48,8 +48,8 @@ aidlc-modu/
 | Store | StoreModule | `id`(PK), `name`, `active` | 1 ↔ N: StoreUser, Table, Menu, Order |
 | StoreUser | AuthModule | `id`, `storeId`, `username`, `passwordHash`(bcrypt), `failedAttempts`, `lockUntil` | N ↔ 1: Store |
 | Table | TableModule | `id`, `storeId`, `number`, `qrToken`(UUIDv4, unique), `active` | N ↔ 1: Store; 1 ↔ N: TableSession |
-| TableSession | TableModule | `id`, `tableId`, `startedAt`, `endedAt?`, `status` | N ↔ 1: Table; 1 ↔ N: SessionParticipant, Order; 1 ↔ 1: Cart |
-| SessionParticipant | TableModule | `id`, `sessionId`, `deviceToken`(opaque), `joinedAt`, `revokedAt?` | N ↔ 1: TableSession |
+| TableSession | TableModule | `id`, `tableId`, `startedAt`(첫 스캔 시각), `endedAt?`, `status` (테이블당 `status=ACTIVE` 1개 unique) | N ↔ 1: Table; 1 ↔ N: SessionParticipant, Order; 1 ↔ 1: Cart |
+| SessionParticipant | TableModule | `id`, `sessionId`(스캔 시 활성 세션 바인딩, **non-null**), `token`(opaque), `joinedAt`, `revokedAt?` | N ↔ 1: TableSession |
 | Cart | CartModule | `sessionId`(PK & FK), `version`(int, 단조 증가), `updatedAt` | 1 ↔ 1: TableSession; 1 ↔ N: CartItem |
 | CartItem | CartModule | `id`, `cartSessionId`, `menuId`, `quantity`, `addedAt` | N ↔ 1: Cart, Menu |
 | Order | OrderModule | `id`, `sessionId`, `total`, `createdAt`, `deletedAt?`(직권 삭제) | N ↔ 1: TableSession; 1 ↔ N: OrderItem |
@@ -75,9 +75,9 @@ src/
 │   ├── QrEntryPage.tsx     # /qr/:token  → /menu 자동 진입 (US-C1.1)
 │   ├── MenuPage.tsx        # /menu       (US-C2.1, C6.1)
 │   ├── CartPage.tsx        # /cart       (US-C3.1~C3.4, C6.1)
-│   ├── OrderHistoryPage.tsx# /orders     (US-C5.1)
-│   ├── HelpOverlay.tsx     # 도움말 오버레이 (US-C0.1)
-│   └── ConfirmOrderPage.tsx# /confirm    (US-C4.1 강화 확인 — P4 보조)
+│   ├── OrderHistoryPage.tsx# /orders     (US-C5.1) — 주문 확정 성공 후 이 화면으로 이동(v2.1)
+│   └── HelpOverlay.tsx     # 도움말 오버레이 (US-C0.1)
+│   # (주문 확정 강화 확인은 별도 라우트 없이 ConfirmDialog 컴포넌트로 처리 — US-C4.1 P4 보조)
 ├── containers/             # 페이지 내 데이터 컨테이너
 │   ├── MenuListContainer.tsx
 │   ├── CartContainer.tsx
@@ -161,11 +161,11 @@ src/
 ├── dto/
 │   ├── auth.dto.ts        # LoginRequest, LoginResponse
 │   ├── qr.dto.ts          # QrScanResponse
-│   ├── menu.dto.ts        # MenuDto, CreateMenuDto, UpdateMenuDto, SoldoutToggleDto
+│   ├── menu.dto.ts        # MenuDto, CreateMenuDto, UpdateMenuDto, SoldoutToggleDto, MenuSortDto
 │   ├── cart.dto.ts        # CartDto, CartItemDto, AddCartItemDto, UpdateCartItemDto
 │   ├── order.dto.ts       # OrderDto, OrderItemDto, CreateOrderResponse
 │   ├── table.dto.ts       # TableDto, CreateTableDto, QrRegenerateResponse
-│   ├── admin.dto.ts       # DashboardDto, HistoryQueryDto
+│   ├── admin.dto.ts       # DashboardDto, HistoryQueryDto, OrderHistoryDto
 │   └── ads.dto.ts         # AdvertisementDto
 ├── sse-events/
 │   ├── session-channel.ts # SessionSseEvent 유니온 타입
