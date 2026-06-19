@@ -15,10 +15,11 @@ export class SseService implements OnModuleDestroy {
     return this.subscribe(this.storeChannels, storeId);
   }
   emitToSession(sessionId: string, event: SessionSseEvent): void {
-    this.sessionChannels.get(sessionId)?.next({ data: event } as MessageEvent);
+    // type 필드는 SSE `event:` 줄로 직렬화 — 클라가 addEventListener(eventName)로 받을 수 있게 함
+    this.sessionChannels.get(sessionId)?.next({ type: event.type, data: event } as MessageEvent);
   }
   emitToStore(storeId: string, event: StoreSseEvent): void {
-    this.storeChannels.get(storeId)?.next({ data: event } as MessageEvent);
+    this.storeChannels.get(storeId)?.next({ type: event.type, data: event } as MessageEvent);
   }
 
   onModuleDestroy(): void {
